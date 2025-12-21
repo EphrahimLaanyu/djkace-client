@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 // import Mixes from './pages/Mixes';
 import About from './pages/About';
+import HomePage from './pages/HomePage';
 // import Contact from './pages/Contact';
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
       {/* <Navbar /> */}
       <main style={{ minHeight: '80vh' }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<HomePage />} />
           {/* <Route path="/mixes" element={<Mixes />} />
           <Route path="/about-dj-kace" element={<About />} />
           <Route path="/book-deejay-kace" element={<Contact />} /> */}
