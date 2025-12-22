@@ -2,8 +2,10 @@ import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
+
 // --- IMPORT YOUR IMAGE ---
-import djImage from '../assets/DSC02056-removebg-preview.png'; 
+import djImage from '../assets/DSC02056-removebg-preview.png';
+
 
 const Home = () => {
   const container = useRef();
@@ -11,43 +13,47 @@ const Home = () => {
   const tiltRef = useRef(); // The Mouse Controller
   const audioRingsRef = useRef(); // NEW: The Record/Audio Rings
 
+
   useGSAP(() => {
     // ----------------------------------------------------------------
     // 1. INITIAL SETUP
     // ----------------------------------------------------------------
     gsap.set(".orbit-text", { opacity: 0 });
-    gsap.set(".dj-hero", { 
-      opacity: 0, 
-      scale: 0.8, 
-      filter: "blur(10px) grayscale(100%) contrast(1.1)" 
+    gsap.set(".dj-hero", {
+      opacity: 0,
+      scale: 0.8,
+      filter: "blur(10px) grayscale(100%) contrast(1.1)"
     });
     // Set rings to scale up
     gsap.set(".audio-rings", { opacity: 0, scale: 0.5 });
 
+
     const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
 
+
     // Reveal Sequence
-    tl.to(".dj-hero", { 
-        opacity: 1, 
-        scale: 1, 
-        filter: "blur(0px) grayscale(100%) contrast(1.1)", 
-        duration: 2 
+    tl.to(".dj-hero", {
+        opacity: 1,
+        scale: 1,
+        filter: "blur(0px) grayscale(100%) contrast(1.1)",
+        duration: 2
       })
-      .to(".audio-rings", { 
-        opacity: 1, 
-        scale: 1, 
-        duration: 1.5 
+      .to(".audio-rings", {
+        opacity: 1,
+        scale: 1,
+        duration: 1.5
       }, "<") // Reveal rings with the DJ
-      .to(".orbit-text", { 
-        opacity: 1, 
-        duration: 1, 
-        stagger: 0.05 
+      .to(".orbit-text", {
+        opacity: 1,
+        duration: 1,
+        stagger: 0.05
       }, "-=0.5");
+
 
     // ----------------------------------------------------------------
     // 2. INFINITE ROTATIONS
     // ----------------------------------------------------------------
-    
+   
     // A. Text Ring Rotation (The Orbit)
     gsap.to(ringRef.current, {
       rotationY: 360,
@@ -55,6 +61,7 @@ const Home = () => {
       repeat: -1,
       ease: "none"
     });
+
 
     // B. NEW: Audio Rings Rotation (Spin like a record)
     gsap.to(audioRingsRef.current, {
@@ -64,7 +71,9 @@ const Home = () => {
       ease: "none"
     });
 
+
   }, { scope: container });
+
 
   // ----------------------------------------------------------------
   // 3. MOUSE INTERACTION
@@ -72,17 +81,19 @@ const Home = () => {
   useGSAP(() => {
     const handleMouseMove = (e) => {
       const { innerWidth, innerHeight } = window;
-      const x = (e.clientX / innerWidth - 0.5) * 2; 
+      const x = (e.clientX / innerWidth - 0.5) * 2;
       const y = (e.clientY / innerHeight - 0.5) * 2;
+
 
       // Tilt the Wrapper (Includes Rings + Text)
       gsap.to(tiltRef.current, {
-        rotationX: -y * 20, 
+        rotationX: -y * 20,
         rotationZ: x * 10,  
         rotationY: x * 20,  
         duration: 1.5,      
         ease: "power2.out"
       });
+
 
       // Parallax the DJ Image
       gsap.to(".dj-hero", {
@@ -95,37 +106,42 @@ const Home = () => {
       });
     };
 
+
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, { scope: container });
 
+
   // --- ORBIT TEXT HELPER ---
   const phrase = "DEEJAY KACE • AFRICAN MZUNGU • ";
-  const textArray = new Array(4).fill(phrase).join("").split(""); 
-  const angleStep = 360 / textArray.length; 
+  const textArray = new Array(4).fill(phrase).join("").split("");
+  const angleStep = 360 / textArray.length;
+
 
   return (
     <div ref={container} style={styles.wrapper}>
-      
+     
       {/* Background */}
       <div style={styles.noise}></div>
       <div style={styles.vignette}></div>
 
+
       {/* 3D SCENE */}
       <div style={styles.scene}>
-        
+       
         {/* 1. DJ HERO (Static Center, Front) */}
         {/* Added translateZ(50px) to pop him slightly in front of the rings */}
-        <img 
-          src={djImage} 
-          className="dj-hero" 
-          alt="DJ Kace" 
-          style={styles.djImage} 
+        <img
+          src={djImage}
+          className="dj-hero"
+          alt="DJ Kace"
+          style={styles.djImage}
         />
+
 
         {/* 2. TILT WRAPPER (Controlled by Mouse) */}
         <div ref={tiltRef} style={styles.tiltWrapper}>
-            
+           
             {/* --- NEW: AUDIO RINGS CONTAINER --- */}
             {/* This spins slowly like a turntable */}
             <div ref={audioRingsRef} className="audio-rings" style={styles.audioRingsContainer}>
@@ -139,11 +155,12 @@ const Home = () => {
                 <div style={styles.ringInner}></div>
             </div>
 
+
             {/* 3. SPINNING TEXT RING */}
             <div ref={ringRef} style={styles.ringContainer}>
               {textArray.map((char, i) => (
-                <span 
-                  key={i} 
+                <span
+                  key={i}
                   className="orbit-text"
                   style={{
                     ...styles.char,
@@ -155,16 +172,21 @@ const Home = () => {
               ))}
             </div>
 
+
         </div>
 
+
       </div>
+
 
       <div style={styles.bottomLeft}>NAIROBI // KE</div>
       <div style={styles.bottomRight}>EST. 2025</div>
 
+
     </div>
   );
 };
+
 
 // --- STYLES ---
 const styles = {
@@ -185,7 +207,7 @@ const styles = {
     position: 'absolute', inset: 0, pointerEvents: 'none',
     background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.2) 150%)'
   },
-  
+ 
   // 3D STAGE
   scene: {
     position: 'relative',
@@ -196,16 +218,18 @@ const styles = {
     transformStyle: 'preserve-3d'
   },
 
+
   // DJ IMAGE
   djImage: {
     height: '85%', width: 'auto',
     position: 'absolute', bottom: 0,
     zIndex: 10,
-    filter: 'grayscale(100%) contrast(1.1)', 
+    filter: 'grayscale(100%) contrast(1.1)',
     pointerEvents: 'none',
     transformStyle: 'preserve-3d',
     transform: 'translateZ(50px)' // Pops in front of rings
   },
+
 
   // TILT WRAPPER
   tiltWrapper: {
@@ -214,6 +238,7 @@ const styles = {
     display: 'flex', justifyContent: 'center', alignItems: 'center',
     transformStyle: 'preserve-3d'
   },
+
 
   // --- NEW AUDIO RINGS STYLES ---
   audioRingsContainer: {
@@ -245,13 +270,15 @@ const styles = {
     backgroundColor: 'rgba(230, 0, 0, 0.05)' // Subtle red fill in center
   },
 
+
   // TEXT RING
   ringContainer: {
     position: 'absolute',
-    transformStyle: 'preserve-3d', 
+    transformStyle: 'preserve-3d',
     width: '100%', height: '100%',
     display: 'flex', justifyContent: 'center', alignItems: 'center',
   },
+
 
   // LETTERS
   char: {
@@ -266,8 +293,11 @@ const styles = {
     whiteSpace: 'pre'
   },
 
+
   bottomLeft: { position: 'absolute', bottom: '30px', left: '30px', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem', color: '#111' },
   bottomRight: { position: 'absolute', bottom: '30px', right: '30px', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem', color: '#E60000' }
 };
 
+
 export default Home;
+
