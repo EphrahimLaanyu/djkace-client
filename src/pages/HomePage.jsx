@@ -1,14 +1,14 @@
 import { memo } from 'react';
 import Home from './Home';
 import DJsPicks from '../components/DJsPicks';
-// import About from './About'; 
+import About from './About';
 
 const HomePage = () => {
   return (
     <div style={styles.mainWrapper}>
       <Home/>
-      {/* <About/> */}
       <DJsPicks/>
+      <About/>
     </div>
   );
 };

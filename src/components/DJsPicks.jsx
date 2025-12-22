@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -51,6 +52,7 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, onToggle, onSeek }) =
 const DJsPicks = () => {
     const containerRef = useRef(null);
     const itemsRef = useRef([]); 
+    const navigate = useNavigate(); // Initialize hook
     
     // Data State
     const [tracks, setTracks] = useState([]);
@@ -218,6 +220,16 @@ const DJsPicks = () => {
                     <span>TOTAL ITEMS:</span>
                     <span>05</span>
                 </div>
+                
+                {/* NEW: VIEW ALL BUTTON */}
+                <button 
+                    onClick={() => navigate('/mixes')} 
+                    style={styles.viewAllBtn}
+                    className="view-all-btn"
+                >
+                    VIEW ALL MIXES →
+                </button>
+
                 <div className="barcode" style={styles.barcode}>||| || ||| | |||| ||| || |||||</div>
                 <div style={styles.thankYou}>THANK YOU FOR LISTENING</div>
             </div>
@@ -229,6 +241,13 @@ const DJsPicks = () => {
                 
                 /* Reset Box Model globally for this page */
                 * { box-sizing: border-box; }
+
+                /* Hover effect for View All Button */
+                .view-all-btn:hover {
+                    background-color: #E60000 !important;
+                    color: #fff !important;
+                    letter-spacing: 2px !important;
+                }
 
                 /* MOBILE RESPONSIVENESS */
                 @media (max-width: 600px) {
@@ -274,7 +293,7 @@ const styles = {
     },
     rollContainer: {
         width: '100%', maxWidth: '500px', // Constrained width prevents overflow
-        paddingBottom: '50px'
+        paddingBottom: '20px'
     },
     row: {
         display: 'flex', flexDirection: 'column',
@@ -314,10 +333,25 @@ const styles = {
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '40px', textAlign: 'right' },
 
     receiptFooter: {
-        textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6
+        textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6,
+        display: 'flex', flexDirection: 'column', alignItems: 'center'
     },
     totalRow: {
-        display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '20px', padding: '0 5px'
+        width: '100%', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '30px', padding: '0 5px'
+    },
+    // NEW BUTTON STYLE
+    viewAllBtn: {
+        background: 'transparent',
+        border: '2px solid #111',
+        color: '#111',
+        padding: '15px 30px',
+        fontFamily: 'inherit',
+        fontSize: '1rem',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        marginBottom: '30px',
+        transition: 'all 0.3s ease',
+        textTransform: 'uppercase'
     },
     barcode: {
         fontFamily: '"Libre Barcode 39 Text", cursive',
