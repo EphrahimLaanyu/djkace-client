@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { ScrollTrigger } from 'gsap/ScrollTrigger'; // Import ScrollTrigger
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,27 +21,25 @@ const Navbar = () => {
   const phase = useRef(0); 
   const mouseX = useRef(0); 
 
-  // --- 1. SMART HIDE ANIMATION (NEW) ---
+  // --- 1. SMART HIDE ANIMATION ---
   useGSAP(() => {
     const anim = gsap.from(containerRef.current, { 
-      yPercent: -100, // Start from "Hidden above screen"
+      yPercent: -100,
       paused: true,
       duration: 0.4,
       ease: "power3.out"
-    }).progress(1); // Immediately fast-forward to "Visible" state
+    }).progress(1);
 
     ScrollTrigger.create({
       start: "top top",
-      end: 99999, // Infinite scroll tracking
+      end: 99999,
       onUpdate: (self) => {
-        // self.direction === 1 (Down) -> Reverse animation (Go to -100% / Hidden)
-        // self.direction === -1 (Up)   -> Play animation (Go to 0% / Visible)
         self.direction === -1 ? anim.play() : anim.reverse();
       }
     });
   }, { scope: containerRef });
 
-  // --- 2. MULTI-PAGE NAVIGATION HANDLER ---
+  // --- 2. NAVIGATION HANDLER ---
   const handleNavigation = (id, path) => {
     if (path && path !== '/') {
       navigate(path);
@@ -60,7 +58,7 @@ const Navbar = () => {
     }
   };
 
-  // --- 3. CANVAS WAVEFORM ENGINE ---
+  // --- 3. CANVAS ENGINE ---
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -113,7 +111,7 @@ const Navbar = () => {
     };
   }, []);
 
-  // --- 4. LINK HOVER EFFECTS ---
+  // --- 4. HOVER EFFECTS ---
   const { contextSafe } = useGSAP({ scope: containerRef });
 
   const onLinkEnter = contextSafe((e) => {
@@ -131,23 +129,21 @@ const Navbar = () => {
   const navItems = [
     { label: 'HOME', id: 'home', path: '/' },      
     { label: 'MIXES', id: 'mixes', path: '/mixes' }, 
-    { label: 'DATES', id: 'dates', path: '/' },    
-    { label: 'SIGNAL', id: 'contact', path: '/' }  
+    { label: 'DATES', id: 'dates', path: '/' },      
   ];
 
   return (
     <div ref={containerRef} style={styles.navWrapper}>
       
-      {/* Background Gradient to ensure text is readable when nav slides down */}
       <div style={styles.bgGradient}></div>
-
       <canvas ref={canvasRef} style={styles.canvas} />
 
-      <div style={styles.linksContainer}>
+      <div className="links-container" style={styles.linksContainer}>
         {navItems.map((item, i) => (
             <button 
                 key={i}
                 onClick={() => handleNavigation(item.id, item.path)} 
+                className="nav-link"
                 style={styles.link}
                 onMouseEnter={onLinkEnter}
                 onMouseLeave={onLinkLeave}
@@ -157,8 +153,34 @@ const Navbar = () => {
         ))}
       </div>
 
-      <div style={styles.metaLeft}>FREQ: 20-20kHZ</div>
-      <div style={styles.metaRight}>SYS: ONLINE</div>
+      <div className="nav-meta" style={styles.metaLeft}>FREQ: 20-20kHZ</div>
+      <div className="nav-meta" style={styles.metaRight}>SYS: ONLINE</div>
+
+      {/* RESPONSIVE STYLES INJECTION */}
+      <style>{`
+        /* Desktop Defaults (handled by inline styles mostly, but accessible here) */
+        
+        @media (max-width: 768px) {
+          /* Tighten gap between links */
+          .links-container {
+            gap: 20px !important; 
+            width: 100% !important;
+            justify-content: center !important;
+          }
+
+          /* Scale down text */
+          .nav-link {
+            font-size: 0.9rem !important;
+            letter-spacing: 1px !important;
+            padding: 10px 5px !important;
+          }
+
+          /* Hide decorative meta text on mobile to clear clutter */
+          .nav-meta {
+            display: none !important;
+          }
+        }
+      `}</style>
 
     </div>
   );
@@ -168,7 +190,7 @@ const Navbar = () => {
 const styles = {
   navWrapper: {
     position: 'fixed',
-    top: 0, // Changed to 0 so it slides completely out of view
+    top: 0,
     left: 0,
     width: '100%',
     height: '100px', 
@@ -177,9 +199,8 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     pointerEvents: 'none',
-    transition: 'transform 0.1s ease-out' // Fallback for non-JS users
+    transition: 'transform 0.1s ease-out'
   },
-  // New: Adds a subtle background so the nav isn't invisible over complex images
   bgGradient: {
     position: 'absolute', inset: 0,
     background: 'linear-gradient(to bottom, rgba(241, 233, 219, 0.95) 0%, rgba(241, 233, 219, 0) 100%)',
