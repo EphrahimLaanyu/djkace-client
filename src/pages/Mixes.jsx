@@ -3,29 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-// Check your import path! It might be './AudioContext' or '../context/AudioContext' depending on your folder structure.
-import { useAudio } from '../context/AudioContext';
+import { useAudio } from '../context/AudioContext'; 
 
 gsap.registerPlugin(ScrollTrigger);
 
 // --- UTILS ---
 const formatTime = (seconds) => {
-    if (!seconds) return "00:00";
+    if (!seconds || isNaN(seconds)) return "00:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-// --- COMPONENT: INLINE PLAYER (ALWAYS VISIBLE) ---
-const ReceiptPlayer = ({ isPlaying, currentTime, duration, onToggle, onSeek, audioUrl }) => {
+// --- COMPONENT: INLINE PLAYER ---
+const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onToggle, onSeek, audioUrl }) => {
+    const displayDuration = isPlaying ? duration : totalDuration;
+
     return (
         <div className="receipt-player" style={styles.playerWrapper}>
             <div style={styles.waveformLine}>
-                 {/* Visualizer: Static line when paused, animated when playing */}
                 {Array(25).fill(0).map((_, i) => (
                     <div key={i} style={{
                         ...styles.waveBar,
-                        height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px', // Visible static bar
+                        height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px',
                         backgroundColor: isPlaying ? '#E60000' : '#333'
                     }} />
                 ))}
@@ -36,7 +36,6 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, onToggle, onSeek, aud
                     {isPlaying ? "PAUSE" : "PLAY"}
                 </button>
 
-                {/* Download Button (Unique to Mixes Page) */}
                 <a 
                     href={audioUrl} 
                     download 
@@ -55,14 +54,16 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, onToggle, onSeek, aud
                 
                 <div style={styles.scrubberContainer}>
                     <input 
-                        type="range" min="0" max={duration || 0} value={currentTime}
+                        type="range" min="0" max={displayDuration || 0} value={currentTime}
                         onChange={(e) => onSeek(e.target.value)}
                         onClick={(e) => e.stopPropagation()}
                         style={styles.rangeInput}
                     />
                 </div>
                 
-                <span style={styles.timeDisplay}>{formatTime(currentTime)}</span>
+                <span style={styles.timeDisplay}>
+                    {formatTime(currentTime)} / {formatTime(displayDuration)}
+                </span>
             </div>
         </div>
     );
@@ -74,11 +75,11 @@ const Mixes = () => {
     const itemsRef = useRef([]); 
     const navigate = useNavigate();
     
-    // USE GLOBAL AUDIO CONTEXT
     const { playingId, isPlaying, currentTime, duration, toggleTrack, seek } = useAudio();
     
     const [tracks, setTracks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [trackDurations, setTrackDurations] = useState({});
 
     // --- FETCH ---
     useEffect(() => {
@@ -98,12 +99,23 @@ const Mixes = () => {
                 }));
                 setTracks(formatted);
                 setLoading(false);
+
+                formatted.forEach(track => {
+                    const audio = new Audio(track.audio);
+                    audio.preload = 'metadata';
+                    audio.onloadedmetadata = () => {
+                        setTrackDurations(prev => ({
+                            ...prev,
+                            [track.id]: audio.duration
+                        }));
+                    };
+                });
             } catch (e) { console.error(e); setLoading(false); }
         };
         fetchTracks();
     }, []);
 
-    // --- SCROLL ANIMATION (Optimized) ---
+    // --- SCROLL ANIMATION ---
     useGSAP(() => {
         if (loading || tracks.length === 0) return;
         itemsRef.current = itemsRef.current.slice(0, tracks.length);
@@ -123,20 +135,26 @@ const Mixes = () => {
         });
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
-    // OPTIMIZED ANIMATION
-    // Removed padding/height changes to prevent lag. 
-    // Removed player expansion logic (it's always open now).
     const animateRow = (element, isActive) => {
         gsap.to(element, {
             scale: isActive ? 1.02 : 0.98,
             opacity: isActive ? 1 : 0.6,
-            // Removed filter blur as it kills mobile performance
             color: isActive ? "#E60000" : "#111",
             borderBottomColor: isActive ? "#E60000" : "#ccc",
             duration: 0.3,
             overwrite: 'auto',
             ease: "power2.out"
         });
+
+        // B&W to Color Animation
+        const img = element.querySelector('.track-cover');
+        if(img) {
+            gsap.to(img, {
+                filter: isActive ? 'grayscale(0%)' : 'grayscale(100%)', 
+                scale: isActive ? 1.05 : 1,
+                duration: 0.3
+            });
+        }
     };
 
     const addToRefs = (el) => {
@@ -171,11 +189,20 @@ const Mixes = () => {
                         style={styles.row}
                         onClick={() => toggleTrack(track)}
                     >
-                        {/* TOP DATA ROW */}
                         <div style={styles.rowData}>
-                            <span style={styles.qty}>
-                                {track.index < 10 ? `0${track.index}` : track.index}
-                            </span>
+                            {/* IMAGE STAMP */}
+                            <div style={styles.coverWrapper}>
+                                <img 
+                                    src={track.cover} 
+                                    alt={track.title} 
+                                    className="track-cover" 
+                                    style={styles.coverImage} 
+                                />
+                                <span style={styles.qty}>
+                                    {track.index < 10 ? `0${track.index}` : track.index}
+                                </span>
+                            </div>
+
                             <div style={styles.meta}>
                                 <div className="track-title" style={styles.title}>{track.title}</div>
                                 <div style={styles.artist}>{track.artist}</div>
@@ -183,11 +210,11 @@ const Mixes = () => {
                             <span style={styles.bpm}>{track.bpm}</span>
                         </div>
 
-                        {/* PLAYER (Always Visible) */}
                         <ReceiptPlayer 
                             isPlaying={playingId === track.id && isPlaying}
                             currentTime={playingId === track.id ? currentTime : 0}
                             duration={playingId === track.id ? duration : 0}
+                            totalDuration={trackDurations[track.id]} 
                             onToggle={() => toggleTrack(track)}
                             onSeek={seek}
                             audioUrl={track.audio} 
@@ -214,6 +241,7 @@ const Mixes = () => {
                     .track-title { font-size: 1rem !important; }
                     .controls-row { gap: 10px !important; }
                     .receipt-player { padding: 0 5px; }
+                    .track-cover { width: 50px !important; height: 50px !important; }
                 }
             `}</style>
         </div>
@@ -232,28 +260,39 @@ const styles = {
     colHeaders: { display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 5px', width: '100%' },
     rollContainer: { width: '100%', maxWidth: '600px', paddingBottom: '80px' },
     
-    // ROW STYLES (Optimized)
+    // ROW STYLES
     row: { 
         display: 'flex', flexDirection: 'column', padding: '20px 5px', 
         borderBottom: '1px dashed #ccc', cursor: 'pointer', 
         transformOrigin: 'center center', overflow: 'hidden', width: '100%',
-        willChange: 'transform, opacity' // Hardware acceleration hint
+        willChange: 'transform, opacity' 
     },
-    rowData: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%' },
-    qty: { width: '40px', opacity: 0.5, fontSize: '0.9rem', flexShrink: 0 },
-    meta: { flexGrow: 1, paddingRight: '15px' },
-    title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', wordBreak: 'break-word' },
+    rowData: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
+    
+    // IMAGE STYLES
+    coverWrapper: { display: 'flex', alignItems: 'center', gap: '15px', flexShrink: 0 },
+    coverImage: {
+        width: '55px', height: '55px', objectFit: 'cover',
+        border: '1px solid #111',
+        filter: 'grayscale(100%)', // Default B&W
+        borderRadius: '2px',
+        transition: 'filter 0.3s'
+    },
+    qty: { opacity: 0.5, fontSize: '0.9rem', fontWeight: 'bold' },
+
+    meta: { flexGrow: 1, paddingLeft: '15px', paddingRight: '15px' },
+    title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.1' },
     artist: { fontSize: '0.8rem', opacity: 0.7 },
     bpm: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
     
-    // PLAYER WRAPPER (Updated to be always visible)
+    // PLAYER WRAPPER
     playerWrapper: { 
         overflow: 'hidden', 
         display: 'flex', 
         flexDirection: 'column', 
         gap: '15px', 
-        height: 'auto', // Always open
-        opacity: 1,     // Always visible
+        height: 'auto', 
+        opacity: 1, 
         marginTop: '15px' 
     },
     waveformLine: { display: 'flex', alignItems: 'center', gap: '3px', height: '30px', marginTop: '10px', width: '100%', overflow: 'hidden' },
@@ -264,7 +303,7 @@ const styles = {
     downloadBtn: { background: 'transparent', border: '1px solid #111', color: '#111', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s', ':hover': { background: '#111', color: '#fff' } },
     scrubberContainer: { flexGrow: 1, display: 'flex', alignItems: 'center' },
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
-    timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '40px', textAlign: 'right' },
+    timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
     
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '600px', marginTop: '20px', opacity: 0.6 },
     totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '20px', padding: '0 5px' },
