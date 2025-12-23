@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useAudio } from '../components/AudioContext';
+// import { useAudio } from '../components/AudioContext';
 import gsap from 'gsap';
 
 const FrequencyTakeover = () => {

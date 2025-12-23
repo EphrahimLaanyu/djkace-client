@@ -8,11 +8,7 @@ import Mixes from './pages/Mixes';
 
 // Global Components
 import Navbar from './components/Navbar';
-import MiniDiscWidget from './components/MiniDiscWidget'; // <-- Import Widget
-
-// Context
-import { AudioProvider } from './components/AudioContext';
-
+import { AudioProvider } from './context/AudioContext';
 function App() {
   return (
     <AudioProvider>
@@ -26,12 +22,8 @@ function App() {
           </Routes>
         </main>
 
-        {/* PERSISTENT PLAYER WIDGET */}
-        {/* It lives outside the Routes so it never reloads */}
-        <MiniDiscWidget />
-
       </Router>
-    </AudioProvider>
+</AudioProvider>
   );
 }
 
