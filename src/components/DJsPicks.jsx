@@ -16,14 +16,16 @@ const formatTime = (seconds) => {
 };
 
 // --- COMPONENT: INLINE PLAYER ---
+// MODIFIED: Always visible. No more expansion animation.
 const ReceiptPlayer = ({ isPlaying, currentTime, duration, onToggle, onSeek }) => {
     return (
         <div className="receipt-player" style={styles.playerWrapper}>
             <div style={styles.waveformLine}>
+                {/* Visualizer: Static line when paused, animated when playing */}
                 {Array(20).fill(0).map((_, i) => (
                     <div key={i} style={{
                         ...styles.waveBar,
-                        height: isPlaying ? `${Math.random() * 20 + 5}px` : '2px',
+                        height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px', // Visible static bar
                         backgroundColor: isPlaying ? '#E60000' : '#333'
                     }} />
                 ))}
@@ -55,7 +57,7 @@ const DJsPicks = () => {
     const itemsRef = useRef([]); 
     const navigate = useNavigate();
     
-    // USE GLOBAL AUDIO CONTEXT
+    // Use Global Audio Context
     const { playingId, isPlaying, currentTime, duration, toggleTrack, seek } = useAudio();
     
     const [tracks, setTracks] = useState([]);
@@ -67,6 +69,7 @@ const DJsPicks = () => {
             try {
                 const response = await fetch('https://djkace-api.elaanyu.workers.dev');
                 const data = await response.json();
+                
                 const limitedData = data.slice(0, 5);
                 
                 const formatted = limitedData.map((t, i) => ({
@@ -88,10 +91,12 @@ const DJsPicks = () => {
     // --- SCROLL ANIMATION ---
     useGSAP(() => {
         if (loading || tracks.length === 0) return;
+
         itemsRef.current = itemsRef.current.slice(0, tracks.length);
 
         itemsRef.current.forEach((item) => {
             if (!item) return;
+
             ScrollTrigger.create({
                 trigger: item,
                 start: "top 70%", 
@@ -103,39 +108,34 @@ const DJsPicks = () => {
                 onLeaveBack: () => animateRow(item, false),
             });
         });
+
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
+    // OPTIMIZED ANIMATION FUNCTION
     const animateRow = (element, isActive) => {
         gsap.to(element, {
-            scale: isActive ? 1.05 : 0.95,
-            opacity: isActive ? 1 : 0.5,
-            filter: isActive ? "blur(0px)" : "blur(1px)",
+            scale: isActive ? 1.05 : 1, 
+            opacity: isActive ? 1 : 0.65,
             color: isActive ? "#E60000" : "#111",
             borderBottomColor: isActive ? "#E60000" : "#ccc",
-            padding: isActive ? "30px 0" : "20px 0",
-            duration: 0.4,
-            ease: "power2.out"
+            duration: 0.3,
+            overwrite: 'auto',
+            ease: "power1.out"
         });
-
-        const player = element.querySelector('.receipt-player');
-        if (player) {
-            gsap.to(player, {
-                height: isActive ? "auto" : 0,
-                opacity: isActive ? 1 : 0,
-                marginTop: isActive ? 20 : 0,
-                duration: 0.4
-            });
-        }
     };
 
     const addToRefs = (el) => {
-        if (el && !itemsRef.current.includes(el)) itemsRef.current.push(el);
+        if (el && !itemsRef.current.includes(el)) {
+            itemsRef.current.push(el);
+        }
     };
 
     if (loading) return <div style={styles.loader}>PRINTING RECEIPT...</div>;
 
     return (
         <div ref={containerRef} style={styles.pageWrapper}>
+            
+            {/* PAPER HEADER */}
             <div style={styles.receiptHeader}>
                 <div className="brand-title" style={styles.brandTitle}>DJ KACE //LATEST MIXES</div>
                 <div style={styles.brandSub}>NAIROBI, KENYA • EST 2025</div>
@@ -148,6 +148,7 @@ const DJsPicks = () => {
                 <div style={styles.divider}>--------------------------------</div>
             </div>
 
+            {/* THE ROLL */}
             <div style={styles.rollContainer}>
                 {tracks.map((track) => (
                     <div 
@@ -155,8 +156,9 @@ const DJsPicks = () => {
                         ref={addToRefs}
                         className="track-row"
                         style={styles.row}
-                        onClick={() => toggleTrack(track)} // Use Context Toggle
+                        onClick={() => toggleTrack(track)}
                     >
+                        {/* TOP LINE: DATA */}
                         <div style={styles.rowData}>
                             <span style={styles.qty}>0{track.index}</span>
                             <div style={styles.meta}>
@@ -166,7 +168,7 @@ const DJsPicks = () => {
                             <span style={styles.bpm}>{track.bpm}</span>
                         </div>
 
-                        {/* CONNECT TO GLOBAL STATE */}
+                        {/* INLINE PLAYER (ALWAYS VISIBLE) */}
                         <ReceiptPlayer 
                             isPlaying={playingId === track.id && isPlaying}
                             currentTime={playingId === track.id ? currentTime : 0}
@@ -178,23 +180,35 @@ const DJsPicks = () => {
                 ))}
             </div>
 
+            {/* PAPER FOOTER */}
             <div style={styles.receiptFooter}>
                 <div style={styles.divider}>--------------------------------</div>
                 <div style={styles.totalRow}>
                     <span>TOTAL ITEMS:</span>
                     <span>05</span>
                 </div>
-                <button onClick={() => navigate('/mixes')} style={styles.viewAllBtn} className="view-all-btn">
+                
+                <button 
+                    onClick={() => navigate('/mixes')} 
+                    style={styles.viewAllBtn}
+                    className="view-all-btn"
+                >
                     VIEW ALL MIXES →
                 </button>
+
                 <div className="barcode" style={styles.barcode}>||| || ||| | |||| ||| || |||||</div>
                 <div style={styles.thankYou}>THANK YOU FOR LISTENING</div>
             </div>
-            
+
+            {/* RESPONSIVE CSS INJECTION */}
             <style>{`
                 .active-row .track-title { font-weight: 900 !important; letter-spacing: 1px; }
                 * { box-sizing: border-box; }
-                .view-all-btn:hover { background-color: #E60000 !important; color: #fff !important; letter-spacing: 2px !important; }
+                .view-all-btn:hover {
+                    background-color: #E60000 !important;
+                    color: #fff !important;
+                    letter-spacing: 2px !important;
+                }
                 @media (max-width: 600px) {
                     .brand-title { font-size: 1.5rem !important; }
                     .track-title { font-size: 1rem !important; }
@@ -207,36 +221,107 @@ const DJsPicks = () => {
     );
 };
 
-// ... (KEEP YOUR EXISTING STYLES OBJECT HERE - IT DOES NOT CHANGE)
-// Just copying styles from previous message for completeness logic
+// --- STYLES ---
 const styles = {
-    pageWrapper: { minHeight: '100vh', width: '100%', backgroundColor: '#F1E9DB', color: '#111', fontFamily: '"Space Mono", "Courier New", monospace', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px 15px', overflowX: 'hidden' },
-    loader: { height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#E60000', fontFamily: 'monospace', letterSpacing: '2px' },
-    receiptHeader: { textAlign: 'center', marginBottom: '20px', width: '100%', maxWidth: '500px' },
+    pageWrapper: {
+        minHeight: '100vh', 
+        width: '100%',
+        backgroundColor: '#F1E9DB', 
+        color: '#111',
+        fontFamily: '"Space Mono", "Courier New", monospace',
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        padding: '100px 15px', 
+        overflowX: 'hidden' 
+    },
+    loader: {
+        height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center',
+        color: '#E60000', fontFamily: 'monospace', letterSpacing: '2px'
+    },
+    receiptHeader: {
+        textAlign: 'center', marginBottom: '20px', width: '100%', maxWidth: '500px'
+    },
     brandTitle: { fontSize: '2rem', fontWeight: '900', marginBottom: '5px', lineHeight: 1 },
     brandSub: { fontSize: '0.8rem', opacity: 0.6 },
     divider: { width: '100%', overflow: 'hidden', whiteSpace: 'nowrap', opacity: 0.3, margin: '15px 0' },
-    colHeaders: { display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 5px' },
-    rollContainer: { width: '100%', maxWidth: '500px', paddingBottom: '20px' },
-    row: { display: 'flex', flexDirection: 'column', padding: '20px 5px', borderBottom: '1px dashed #ccc', cursor: 'pointer', transformOrigin: 'center center', overflow: 'hidden', width: '100%' },
-    rowData: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%' },
+    colHeaders: {
+        display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 5px'
+    },
+    rollContainer: {
+        width: '100%', maxWidth: '500px', 
+        paddingBottom: '20px'
+    },
+    row: {
+        display: 'flex', flexDirection: 'column',
+        padding: '20px 5px', 
+        borderBottom: '1px dashed #ccc',
+        cursor: 'pointer',
+        transformOrigin: 'center center',
+        overflow: 'hidden',
+        width: '100%',
+        willChange: 'transform, opacity' 
+    },
+    rowData: {
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%'
+    },
     qty: { width: '30px', opacity: 0.5, fontSize: '0.8rem', flexShrink: 0 },
     meta: { flexGrow: 1, paddingRight: '10px' },
     title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', wordBreak: 'break-word' },
     artist: { fontSize: '0.8rem', opacity: 0.7 },
     bpm: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
-    playerWrapper: { height: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '15px' },
-    waveformLine: { display: 'flex', alignItems: 'center', gap: '3px', height: '30px', marginTop: '10px', width: '100%', overflow: 'hidden' },
+
+    // PLAYER - ALWAYS VISIBLE MOD
+    playerWrapper: {
+        overflow: 'hidden',
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '15px',
+        // REMOVED: Height toggle logic. 
+        // ADDED: Default spacing
+        marginTop: '15px',
+        height: 'auto', 
+        opacity: 1
+    },
+    waveformLine: {
+        display: 'flex', alignItems: 'center', gap: '3px', height: '30px', marginTop: '10px',
+        width: '100%', overflow: 'hidden'
+    },
     waveBar: { flex: 1, borderRadius: '2px', transition: 'height 0.1s ease', minWidth: '2px' },
+    
     controlsRow: { display: 'flex', alignItems: 'center', gap: '15px', width: '100%' },
-    playBtn: { background: '#111', color: '#fff', border: 'none', padding: '8px 12px', fontFamily: 'inherit', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0 },
+    playBtn: {
+        background: '#111', color: '#fff', border: 'none', padding: '8px 12px',
+        fontFamily: 'inherit', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0
+    },
     scrubberContainer: { flexGrow: 1, display: 'flex', alignItems: 'center' },
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '40px', textAlign: 'right' },
-    receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6, display: 'flex', flexDirection: 'column', alignItems: 'center' },
-    totalRow: { width: '100%', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '30px', padding: '0 5px' },
-    viewAllBtn: { background: 'transparent', border: '2px solid #111', color: '#111', padding: '15px 30px', fontFamily: 'inherit', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', marginBottom: '30px', transition: 'all 0.3s ease', textTransform: 'uppercase' },
-    barcode: { fontFamily: '"Libre Barcode 39 Text", cursive', fontSize: '2rem', letterSpacing: '4px', transform: 'scaleY(1.5)', marginBottom: '10px' },
+
+    receiptFooter: {
+        textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6,
+        display: 'flex', flexDirection: 'column', alignItems: 'center'
+    },
+    totalRow: {
+        width: '100%', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '30px', padding: '0 5px'
+    },
+    viewAllBtn: {
+        background: 'transparent',
+        border: '2px solid #111',
+        color: '#111',
+        padding: '15px 30px',
+        fontFamily: 'inherit',
+        fontSize: '1rem',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        marginBottom: '30px',
+        transition: 'all 0.3s ease',
+        textTransform: 'uppercase'
+    },
+    barcode: {
+        fontFamily: '"Libre Barcode 39 Text", cursive',
+        fontSize: '2rem', letterSpacing: '4px', transform: 'scaleY(1.5)', marginBottom: '10px'
+    },
     thankYou: { fontSize: '0.8rem' }
 };
 
