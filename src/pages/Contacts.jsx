@@ -3,9 +3,15 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Footer from './Footer';
 
+// --- IMPORT YOUR IMAGE ---
+import DjImage from '../assets/PAT01853-removebg-preview.png'; 
+
+// --- FILMSTRIP CONFIGURATION ---
+const filmImages = [DjImage, DjImage, DjImage, DjImage];
+
 const Contact = () => {
   const containerRef = useRef(null);
-  const infoRef = useRef(null);
+  const rightSideVisualsRef = useRef(null);
   const formRef = useRef(null);
   const marqueeRef = useRef(null);
 
@@ -35,13 +41,21 @@ const Contact = () => {
         x: -30, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power2.out", delay: 0.2
     });
 
-    // 2. INFO ANIMATION
-    const tl = gsap.timeline({ delay: 0.5 });
-    tl.from(".info-header", { opacity: 0, y: -20, duration: 0.5 })
-      .from(".info-row", { opacity: 0, x: 20, stagger: 0.1, duration: 0.6, ease: "power2.out" })
-      .from(".dev-block", { opacity: 0, y: 30, duration: 0.5, ease: "back.out" }, "-=0.2");
+    // 2. VERTICAL FILMSTRIP ANIMATION (Right Side)
+    const filmTween = gsap.to(".filmstrip", {
+        yPercent: -50,
+        ease: "none",
+        duration: 40, 
+        repeat: -1
+    });
 
-    // 3. INFINITE MARQUEE ANIMATION
+    const rightContainer = rightSideVisualsRef.current;
+    if (rightContainer) {
+        rightContainer.addEventListener("mouseenter", () => gsap.to(filmTween, { timeScale: 0.2, duration: 0.5 }));
+        rightContainer.addEventListener("mouseleave", () => gsap.to(filmTween, { timeScale: 1, duration: 0.5 }));
+    }
+
+    // 3. INFINITE MARQUEE ANIMATION (Bottom)
     const marqueeTween = gsap.to(".marquee-content", {
         xPercent: -100, 
         repeat: -1,
@@ -57,8 +71,24 @@ const Contact = () => {
 
   }, { scope: containerRef });
 
+  const renderImages = (keyPrefix) => (
+      filmImages.map((imgSrc, i) => (
+          <div key={`${keyPrefix}-${i}`} style={styles.filmItem}>
+              <div style={styles.filmMeta}>
+                  <span style={styles.filmNum}>A{i + 1}.</span>
+                  <span style={styles.filmLine}>----------------</span>
+                  <span style={styles.filmTag}>KODAK 400</span>
+              </div>
+              <div style={styles.imageWrapper}>
+                  <img src={imgSrc} alt={`Strip ${i}`} style={styles.stripImage} />
+                  <div style={styles.sprocketLeft}></div>
+                  <div style={styles.sprocketRight}></div>
+              </div>
+          </div>
+      ))
+  );
+
   return (
-    // Wrapped in a flex column to stack the Section and the Footer
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
         
         <section ref={containerRef} style={styles.pageWrapper}>
@@ -116,7 +146,7 @@ const Contact = () => {
                             backgroundColor: status === 'SENT' ? '#4CAF50' : '#111'
                         }}
                     >
-                        {status === 'IDLE' && '▶ PRESS PLAY TO SEND'}
+                        {status === 'IDLE' && '▶ PRESS TO SEND'}
                         {status === 'SENDING' && 'RECORDING...'}
                         {status === 'SENT' && '✓ TRANSMISSION RECEIVED'}
                     </button>
@@ -136,58 +166,13 @@ const Contact = () => {
             <div style={styles.dividerNotchBottom}></div>
         </div>
 
-        {/* --- RIGHT SIDE: INFO --- */}
-        <div className="info-side" style={styles.infoSide} ref={infoRef}>
-            <div style={styles.infoWrapper}>
-                <div style={styles.infoSection}>
-                    <div className="info-header" style={styles.sectionTitle}>
-                        <span style={styles.redDot}></span>
-                        SYSTEM OUTPUT // CONTACT INFO
-                    </div>
-                    <div style={styles.gridContainer}>
-                        <div className="info-row" style={styles.dataRow}>
-                            <span style={styles.dataLabel}>BOOKINGS</span>
-                            <a href="mailto:info@deejaykace.com" style={styles.dataValueLink}>INFO@DEEJAYKACE.COM</a>
-                        </div>
-                        <div className="info-row" style={styles.dataRow}>
-                            <span style={styles.dataLabel}>PHONE</span>
-                            <span style={styles.dataValue}>+254 700 000 000</span>
-                        </div>
-                        <div className="info-row" style={styles.dataRow}>
-                            <span style={styles.dataLabel}>LOCATION</span>
-                            <span style={styles.dataValue}>NAIROBI, KENYA</span>
-                        </div>
-                        <div className="info-row" style={styles.socialBlock}>
-                            <div style={styles.dataLabel}>FREQUENCIES</div>
-                            <div style={styles.socialLinks}>
-                                <a href="#" style={styles.socialLink}>INSTAGRAM</a>
-                                <a href="#" style={styles.socialLink}>MIXCLOUD</a>
-                                <a href="#" style={styles.socialLink}>TWITTER</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style={styles.dividerLight}>--------------------------------</div>
-                <div className="dev-block" style={styles.devSection}>
-                    <div style={styles.sectionTitle}>
-                        <span style={styles.greenDot}></span>
-                        SYSTEM ARCHITECTURE
-                    </div>
-                    <div style={styles.devCard}>
-                        <div style={styles.devHeader}>
-                            <span style={styles.devLabel}>DESIGN & DEVELOPMENT</span>
-                            <span style={styles.devId}>ID: DEV-001</span>
-                        </div>
-                        <h3 style={styles.agencyName}>AGENCY NAME</h3>
-                        <p style={styles.devDesc}>
-                            High-fidelity web experiences, custom audio visualizations, and digital branding.
-                        </p>
-                        <a href="mailto:hello@agency.com" style={styles.hireBtn}>
-                            [ INITIATE COLLABORATION ]
-                        </a>
-                    </div>
-                </div>
+        {/* --- RIGHT SIDE: VERTICAL FILMSTRIP --- */}
+        <div className="info-side" style={styles.rightSideContainer} ref={rightSideVisualsRef}>
+            <div className="filmstrip" style={styles.filmstrip}>
+                {renderImages('original')}
+                {renderImages('clone')}
             </div>
+            <div style={styles.focusLine}></div>
         </div>
 
         {/* --- BOTTOM ENDLESS MARQUEE BAND --- */}
@@ -204,24 +189,38 @@ const Contact = () => {
 
         <style>{`
             ::placeholder { color: #888; opacity: 0.6; }
+            
+            /* MOBILE RESPONSIVE STYLES (Max Width 900px) */
             @media (max-width: 900px) {
-                section { flex-direction: column !important; }
+                .main-content-row { flex-direction: column !important; }
+                
+                /* HIDE RIGHT SIDE & DIVIDER */
+                .info-side { display: none !important; }
                 .vertical-divider { display: none !important; }
-                .info-side { position: relative !important; height: auto !important; padding: 60px 30px 80px 30px !important; border-top: 2px dashed #ccc; }
-                .sleeve-side { border-right: none !important; }
+                
+                /* MAKE FORM FULL WIDTH & RESPONSIVE */
+                .sleeve-side { 
+                    width: 100% !important; 
+                    padding: 40px 20px !important; 
+                    border-right: none !important;
+                    min-width: unset !important;
+                }
+                
+                /* Adjust Text Sizes for Mobile */
+                .albumTitle { font-size: 2rem !important; }
+                .input { font-size: 1rem !important; }
+                .textarea { font-size: 1rem !important; }
+                .submitBtn { padding: 15px 20px !important; font-size: 0.9rem !important; }
             }
         `}</style>
         </section>
 
-        {/* --- NEW FOOTER COMPONENT --- */}
+        {/* --- FOOTER --- */}
         <Footer />
         
     </div>
   );
 };
-
-
-
 
 // --- STYLES ---
 const styles = {
@@ -267,12 +266,19 @@ const styles = {
 
   // --- LEFT SIDE ---
   sleeveContainer: {
-    flex: '1', padding: '80px 50px',
-    display: 'flex', flexDirection: 'column', justifyContent: 'center',
-    position: 'relative', minWidth: '320px', zIndex: 2
+    flex: '1', 
+    padding: '80px 50px',
+    display: 'flex', 
+    flexDirection: 'column', 
+    justifyContent: 'center',
+    position: 'relative', 
+    minWidth: '320px', 
+    zIndex: 2,
+    backgroundColor: '#F1E9DB',
+    className: 'sleeve-side' // Added for targeting
   },
   headerBlock: { marginBottom: '40px' },
-  albumTitle: { fontSize: '2.5rem', fontWeight: '900', lineHeight: '1', marginBottom: '10px', letterSpacing: '-1px' },
+  albumTitle: { fontSize: '2.5rem', fontWeight: '900', lineHeight: '1', marginBottom: '10px', letterSpacing: '-1px', className: 'albumTitle' },
   albumSub: { fontSize: '0.9rem', color: '#666', letterSpacing: '1px' },
   divider: { margin: '20px 0', opacity: 0.3, whiteSpace: 'nowrap', overflow: 'hidden' },
   form: { display: 'flex', flexDirection: 'column', gap: '15px' },
@@ -280,96 +286,104 @@ const styles = {
   trackNum: { width: '40px', fontWeight: 'bold', paddingTop: '10px', color: '#E60000' },
   inputWrapper: { flexGrow: 1, display: 'flex', flexDirection: 'column' },
   label: { fontSize: '0.6rem', color: '#666', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '1px' },
-  input: { background: 'transparent', border: 'none', fontFamily: '"Space Mono", monospace', fontSize: '1.2rem', fontWeight: 'bold', color: '#111', outline: 'none', width: '100%' },
-  textarea: { background: 'transparent', border: 'none', fontFamily: '"Space Mono", monospace', fontSize: '1.2rem', fontWeight: 'bold', color: '#111', outline: 'none', width: '100%', resize: 'none' },
+  input: { background: 'transparent', border: 'none', fontFamily: '"Space Mono", monospace', fontSize: '1.2rem', fontWeight: 'bold', color: '#111', outline: 'none', width: '100%', className: 'input' },
+  textarea: { background: 'transparent', border: 'none', fontFamily: '"Space Mono", monospace', fontSize: '1.2rem', fontWeight: 'bold', color: '#111', outline: 'none', width: '100%', resize: 'none', className: 'textarea' },
   duration: { fontSize: '0.8rem', color: '#888', paddingTop: '10px', width: '50px', textAlign: 'right' },
   submitRow: { marginTop: '30px' },
-  submitBtn: { background: '#111', color: '#F1E9DB', border: 'none', padding: '20px 40px', fontSize: '1rem', fontWeight: 'bold', fontFamily: 'inherit', cursor: 'pointer', width: '100%', textAlign: 'left', transition: 'all 0.3s ease', textTransform: 'uppercase' },
+  submitBtn: { background: '#111', color: '#F1E9DB', border: 'none', padding: '20px 40px', fontSize: '1rem', fontWeight: 'bold', fontFamily: 'inherit', cursor: 'pointer', width: '100%', textAlign: 'left', transition: 'all 0.3s ease', textTransform: 'uppercase', className: 'submitBtn' },
   creditsFooter: { marginTop: 'auto', paddingTop: '40px' },
   smallCredit: { fontSize: '0.6rem', color: '#888', marginBottom: '5px' },
 
   // --- DIVIDER ---
-  verticalDivider: { position: 'relative', width: '2px', background: 'transparent', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', zIndex: 10 },
+  verticalDivider: { position: 'relative', width: '2px', background: 'transparent', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', zIndex: 10, className: 'vertical-divider' },
   dividerLine: { height: '90%', width: '2px', backgroundImage: 'linear-gradient(to bottom, #ccc 0%, #ccc 50%, transparent 50%)', backgroundSize: '2px 10px', opacity: 0.5 },
   dividerNotchTop: { position: 'absolute', top: '5%', width: '10px', height: '2px', background: '#111' },
   dividerNotchBottom: { position: 'absolute', bottom: '5%', width: '10px', height: '2px', background: '#111' },
 
-  // --- RIGHT SIDE ---
-  infoSide: { flex: '1', color: '#111', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'sticky', top: 0, height: '100vh', padding: '40px', minWidth: '320px', zIndex: 1 },
-  infoWrapper: { width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '40px' },
-  sectionTitle: { fontSize: '0.8rem', color: '#666', marginBottom: '20px', letterSpacing: '2px', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' },
-  redDot: { width: '8px', height: '8px', background: '#E60000', borderRadius: '50%', boxShadow: '0 0 5px rgba(230,0,0,0.5)' },
-  greenDot: { width: '8px', height: '8px', background: '#0f0', borderRadius: '50%', boxShadow: '0 0 5px rgba(0,255,0,0.5)' },
-  gridContainer: { display: 'flex', flexDirection: 'column', gap: '20px' },
-  dataRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #ddd', paddingBottom: '10px' },
-  dataLabel: { fontSize: '0.7rem', color: '#888', fontWeight: 'bold' },
-  dataValue: { fontSize: '1.1rem', fontWeight: 'bold', fontFamily: '"Rajdhani", sans-serif' },
-  dataValueLink: { fontSize: '1.1rem', fontWeight: 'bold', fontFamily: '"Rajdhani", sans-serif', color: '#E60000', textDecoration: 'none' },
-  socialBlock: { marginTop: '10px' },
-  socialLinks: { display: 'flex', gap: '20px', marginTop: '15px' },
-  socialLink: { color: '#111', textDecoration: 'none', fontSize: '0.9rem', borderBottom: '2px solid #ccc', paddingBottom: '2px', fontWeight: 'bold' },
-  dividerLight: { color: '#ccc', overflow: 'hidden', whiteSpace: 'nowrap', opacity: 0.5 },
-  devSection: { marginTop: '10px' },
-  devCard: { background: '#fff', border: '3px solid #111', padding: '25px', borderRadius: '0px', position: 'relative', boxShadow: '8px 8px 0 rgba(0,0,0,0.1)' },
-  devHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: '15px', borderBottom: '1px dashed #ccc', paddingBottom: '10px' },
-  devLabel: { fontSize: '0.6rem', color: '#E60000', fontWeight: 'bold', letterSpacing: '1px' },
-  devId: { fontSize: '0.6rem', fontFamily: 'monospace', color: '#444', fontWeight: 'bold' },
-  agencyName: { fontSize: '1.8rem', margin: '0 0 10px 0', fontFamily: '"Rajdhani", sans-serif', fontWeight: '900', textTransform: 'uppercase' },
-  devDesc: { fontSize: '0.8rem', color: '#444', lineHeight: '1.5', marginBottom: '25px', fontWeight: 'bold' },
-  hireBtn: { display: 'block', textAlign: 'center', padding: '15px', border: '3px solid #111', color: '#111', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '2px', fontWeight: '900', transition: 'all 0.3s ease', background: 'transparent', textTransform: 'uppercase' },
+  // --- RIGHT SIDE: VISUALS (FILMSTRIP) ---
+  rightSideContainer: { 
+      flex: '1', 
+      color: '#111', 
+      display: 'flex', 
+      flexDirection: 'column',
+      justifyContent: 'flex-start', 
+      alignItems: 'center', 
+      position: 'sticky', 
+      top: 0, 
+      height: '100vh', 
+      padding: '0', 
+      minWidth: '320px', 
+      zIndex: 1,
+      overflow: 'hidden', 
+      backgroundColor: '#F1E9DB',
+      className: 'info-side' // Added for targeting
+  },
+  
+  filmstrip: {
+      width: '80%', 
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      willChange: 'transform'
+  },
 
-  // --- FOOTER STYLES ---
-  footer: {
-      backgroundColor: '#111',
-      color: '#F1E9DB',
-      padding: '60px 50px 30px',
-      fontFamily: '"Space Mono", monospace',
-      borderTop: '2px solid #E60000'
-  },
-  footerInner: {
+  filmItem: {
+      width: '100%',
+      marginBottom: '40px', 
       display: 'flex',
-      flexWrap: 'wrap',
-      gap: '40px',
-      justifyContent: 'space-between',
-      marginBottom: '50px'
+      flexDirection: 'column',
+      alignItems: 'center'
   },
-  footerCol: {
-      flex: '1',
-      minWidth: '200px'
-  },
-  footerTitle: {
-      fontSize: '1rem',
-      fontWeight: 'bold',
-      marginBottom: '20px',
-      color: '#E60000',
-      letterSpacing: '2px'
-  },
-  footerText: {
-      fontSize: '0.8rem',
-      lineHeight: '1.6',
-      opacity: 0.7
-  },
-  footerList: {
-      listStyle: 'none',
-      padding: 0,
-      margin: 0
-  },
-  footerLink: {
-      display: 'block',
-      color: '#F1E9DB',
-      textDecoration: 'none',
-      fontSize: '0.8rem',
-      marginBottom: '10px',
-      opacity: 0.7,
-      transition: 'opacity 0.3s'
-  },
-  footerBottom: {
+
+  filmMeta: {
+      width: '100%',
       display: 'flex',
       justifyContent: 'space-between',
-      borderTop: '1px solid #333',
-      paddingTop: '20px',
       fontSize: '0.7rem',
-      opacity: 0.5
+      fontWeight: 'bold',
+      color: '#E60000',
+      marginBottom: '5px',
+      fontFamily: '"Rajdhani", sans-serif'
+  },
+  
+  filmNum: { fontWeight: '900', letterSpacing: '1px' },
+  filmLine: { opacity: 0.3, letterSpacing: '-2px', overflow: 'hidden' },
+  filmTag: { opacity: 0.8 },
+
+  imageWrapper: {
+      width: '100%',
+      position: 'relative',
+      padding: '0 20px', 
+      backgroundColor: '#111', 
+  },
+
+  stripImage: {
+      width: '100%',
+      height: 'auto',
+      display: 'block',
+      filter: 'grayscale(100%) contrast(110%)',
+  },
+
+  // Fake Sprocket Holes
+  sprocketLeft: {
+      position: 'absolute', left: '5px', top: 0, bottom: 0, width: '10px',
+      background: 'repeating-linear-gradient(to bottom, #fff 0px, #fff 10px, transparent 10px, transparent 20px)',
+      opacity: 0.8
+  },
+  sprocketRight: {
+      position: 'absolute', right: '5px', top: 0, bottom: 0, width: '10px',
+      background: 'repeating-linear-gradient(to bottom, #fff 0px, #fff 10px, transparent 10px, transparent 20px)',
+      opacity: 0.8
+  },
+
+  focusLine: {
+      position: 'absolute',
+      top: '50%', left: '0', right: '0',
+      height: '2px',
+      borderTop: '2px dashed #E60000',
+      opacity: 0.3,
+      pointerEvents: 'none',
+      zIndex: 10
   }
 };
 
