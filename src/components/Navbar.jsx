@@ -21,7 +21,7 @@ const Navbar = () => {
   const phase = useRef(0); 
   const mouseX = useRef(0); 
 
-  // --- 1. SMART HIDE ANIMATION ---
+  // --- 1. SMART HIDE ANIMATION (UPDATED WITH AUTO-HIDE) ---
   useGSAP(() => {
     const anim = gsap.from(containerRef.current, { 
       yPercent: -100,
@@ -30,13 +30,52 @@ const Navbar = () => {
       ease: "power3.out"
     }).progress(1);
 
+    // Auto-hide Logic
+    let hideTimer = gsap.delayedCall(1.5, () => anim.reverse());
+
+    const showNavbar = () => {
+        anim.play();
+        hideTimer.restart(true); // Reset the timer, but pause it while active
+        hideTimer.pause();
+    };
+
+    const hideNavbar = () => {
+        hideTimer.restart(true); // Start the countdown
+    };
+
+    // Scroll Logic
     ScrollTrigger.create({
       start: "top top",
       end: 99999,
       onUpdate: (self) => {
-        self.direction === -1 ? anim.play() : anim.reverse();
+        if (self.direction === -1) {
+            anim.play(); // Scroll Up: Show immediately
+            hideTimer.restart(true); // Start timer to eventually hide again if idle
+        } else {
+            anim.reverse(); // Scroll Down: Hide immediately
+        }
       }
     });
+
+    // Hover Logic (Keep visible while using)
+    const navEl = containerRef.current;
+    navEl.addEventListener("mouseenter", showNavbar);
+    navEl.addEventListener("mouseleave", hideNavbar);
+
+    // Edge Case: Show if mouse is at very top of screen
+    const handleMouseMove = (e) => {
+        if (e.clientY < 10) showNavbar();
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
+    // Cleanup
+    return () => {
+        navEl.removeEventListener("mouseenter", showNavbar);
+        navEl.removeEventListener("mouseleave", hideNavbar);
+        window.removeEventListener("mousemove", handleMouseMove);
+        hideTimer.kill();
+    };
+
   }, { scope: containerRef });
 
   // --- 2. NAVIGATION HANDLER ---
@@ -198,7 +237,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    pointerEvents: 'none',
+    pointerEvents: 'none', // Allows clicking through empty areas
     transition: 'transform 0.1s ease-out'
   },
   bgGradient: {
