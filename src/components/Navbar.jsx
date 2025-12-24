@@ -21,7 +21,7 @@ const Navbar = () => {
   const phase = useRef(0); 
   const mouseX = useRef(0); 
 
-  // --- 1. SMART HIDE ANIMATION (UPDATED WITH AUTO-HIDE) ---
+  // --- 1. SMART HIDE ANIMATION (UPDATED) ---
   useGSAP(() => {
     const anim = gsap.from(containerRef.current, { 
       yPercent: -100,
@@ -30,17 +30,26 @@ const Navbar = () => {
       ease: "power3.out"
     }).progress(1);
 
-    // Auto-hide Logic
-    let hideTimer = gsap.delayedCall(1.5, () => anim.reverse());
+    // Auto-hide Logic: Only hide if we are NOT at the top
+    let hideTimer = gsap.delayedCall(1.5, () => {
+        if (window.scrollY > 50) { 
+            anim.reverse();
+        }
+    });
 
     const showNavbar = () => {
         anim.play();
-        hideTimer.restart(true); // Reset the timer, but pause it while active
-        hideTimer.pause();
+        hideTimer.restart(true);
+        hideTimer.pause(); // Pause timer while hovering
     };
 
     const hideNavbar = () => {
-        hideTimer.restart(true); // Start the countdown
+        // UPDATED: If at the top (less than 50px scroll), don't hide
+        if (window.scrollY <= 50) {
+            hideTimer.pause();
+            return;
+        }
+        hideTimer.restart(true);
     };
 
     // Scroll Logic
@@ -49,20 +58,28 @@ const Navbar = () => {
       end: 99999,
       onUpdate: (self) => {
         if (self.direction === -1) {
-            anim.play(); // Scroll Up: Show immediately
-            hideTimer.restart(true); // Start timer to eventually hide again if idle
+            // Scroll Up: Show immediately
+            anim.play(); 
+            
+            // UPDATED: If we scrolled back to the top, pause the hide timer
+            if (window.scrollY <= 50) {
+                hideTimer.pause();
+            } else {
+                hideTimer.restart(true); // Otherwise, start countdown to hide
+            }
         } else {
-            anim.reverse(); // Scroll Down: Hide immediately
+            // Scroll Down: Hide immediately
+            anim.reverse(); 
         }
       }
     });
 
-    // Hover Logic (Keep visible while using)
+    // Hover Logic
     const navEl = containerRef.current;
     navEl.addEventListener("mouseenter", showNavbar);
     navEl.addEventListener("mouseleave", hideNavbar);
 
-    // Edge Case: Show if mouse is at very top of screen
+    // Mouse Move Logic (Edge case)
     const handleMouseMove = (e) => {
         if (e.clientY < 10) showNavbar();
     };
@@ -195,26 +212,18 @@ const Navbar = () => {
       <div className="nav-meta" style={styles.metaLeft}>FREQ: 20-20kHZ</div>
       <div className="nav-meta" style={styles.metaRight}>SYS: ONLINE</div>
 
-      {/* RESPONSIVE STYLES INJECTION */}
       <style>{`
-        /* Desktop Defaults (handled by inline styles mostly, but accessible here) */
-        
         @media (max-width: 768px) {
-          /* Tighten gap between links */
           .links-container {
             gap: 20px !important; 
             width: 100% !important;
             justify-content: center !important;
           }
-
-          /* Scale down text */
           .nav-link {
             font-size: 0.9rem !important;
             letter-spacing: 1px !important;
             padding: 10px 5px !important;
           }
-
-          /* Hide decorative meta text on mobile to clear clutter */
           .nav-meta {
             display: none !important;
           }
@@ -237,7 +246,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    pointerEvents: 'none', // Allows clicking through empty areas
+    pointerEvents: 'none', 
     transition: 'transform 0.1s ease-out'
   },
   bgGradient: {
