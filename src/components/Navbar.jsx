@@ -129,7 +129,7 @@ const Navbar = () => {
   const navItems = [
     { label: 'HOME', id: 'home', path: '/' },      
     { label: 'MIXES', id: 'mixes', path: '/mixes' }, 
-    { label: 'DATES', id: 'dates', path: '/' },      
+    { label: 'CONTACTS', id: 'contacts', path: '/contacts' },      
   ];
 
   return (

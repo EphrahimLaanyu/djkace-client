@@ -9,6 +9,7 @@ import Mixes from './pages/Mixes';
 // Global Components
 import Navbar from './components/Navbar';
 import { AudioProvider } from './context/AudioContext';
+import Contact from './pages/Contacts';
 function App() {
   return (
     <AudioProvider>
@@ -19,6 +20,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/mixes" element={<Mixes />} />
+            <Route path="/contacts" element={<Contact />} />
           </Routes>
         </main>
 
