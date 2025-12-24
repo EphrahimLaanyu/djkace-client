@@ -63,6 +63,7 @@ const DJsPicks = () => {
     const [loading, setLoading] = useState(true);
     const [trackDurations, setTrackDurations] = useState({});
 
+    // 1. FETCH DATA
     useEffect(() => {
         const fetchTracks = async () => {
             try {
@@ -97,6 +98,19 @@ const DJsPicks = () => {
         fetchTracks();
     }, []);
 
+    // 2. *** THE FIX: REFRESH SCROLLTRIGGER AFTER DATA LOADS ***
+    // This ensures GSAP knows the new page height after the API data expands the DOM.
+    useEffect(() => {
+        if (!loading && tracks.length > 0) {
+            // Slight delay to ensure the DOM has fully painted the new height
+            const timer = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, tracks]);
+
+    // 3. ANIMATIONS
     useGSAP(() => {
         if (loading || tracks.length === 0) return;
         itemsRef.current = itemsRef.current.slice(0, tracks.length);
@@ -117,7 +131,6 @@ const DJsPicks = () => {
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
     const animateRow = (element, isActive) => {
-        // Reverted to a subtler highlight animation for the continuous roll look
         gsap.to(element, {
             scale: isActive ? 1.02 : 1,
             opacity: isActive ? 1 : 0.7,
@@ -128,7 +141,6 @@ const DJsPicks = () => {
             ease: "power1.out"
         });
         
-        // Animate the image inside (grayscale to color)
         const img = element.querySelector('.track-cover');
         if(img) {
             gsap.to(img, {
@@ -161,17 +173,15 @@ const DJsPicks = () => {
 
             <div style={styles.rollContainer}>
                 {tracks.map((track) => {
-                    // Removed Zebra striping logic here
                     return (
                         <div 
                             key={track.id} 
                             ref={addToRefs}
                             className="track-row"
-                            style={styles.row} // Reverted to basic row style
+                            style={styles.row}
                             onClick={() => toggleTrack(track)}
                         >
                             <div style={styles.rowData}>
-                                {/* ALBUM ART STAMP */}
                                 <div style={styles.coverWrapper}>
                                     <img 
                                         src={track.cover} 
@@ -225,7 +235,6 @@ const DJsPicks = () => {
                     .controls-row { gap: 10px !important; }
                     .barcode { font-size: 1.5rem !important; }
                     .receipt-player { padding: 0 5px; }
-                    /* Adjust image size on mobile */
                     .track-cover { width: 50px !important; height: 50px !important; }
                 }
             `}</style>
@@ -254,27 +263,23 @@ const styles = {
     colHeaders: {
         display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 5px'
     },
-    
-    // --- REVERTED CONTAINER & ROW STYLES ---
     rollContainer: {
         width: '100%', maxWidth: '500px', 
         paddingBottom: '20px',
         display: 'flex', flexDirection: 'column', 
-        gap: '0px' // Removed gap for continuous roll
+        gap: '0px'
     },
     row: {
         display: 'flex', flexDirection: 'column',
-        padding: '20px 5px', // Reduced padding back to standard receipt look
-        borderBottom: '1px dashed #ccc', // Re-added dashed separator
-        boxShadow: 'none', // Removed box shadow
+        padding: '20px 5px', 
+        borderBottom: '1px dashed #ccc', 
+        boxShadow: 'none', 
         cursor: 'pointer',
         transformOrigin: 'center center',
         overflow: 'hidden',
         width: '100%',
         willChange: 'transform, opacity'
-        // Removed background-color transition
     },
-    
     rowData: {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'
     },
@@ -289,12 +294,10 @@ const styles = {
         borderRadius: '2px'
     },
     qty: { opacity: 0.5, fontSize: '0.8rem', fontWeight: 'bold' },
-
     meta: { flexGrow: 1, paddingLeft: '15px', paddingRight: '10px' },
     title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.1' },
     artist: { fontSize: '0.8rem', opacity: 0.7 },
     bpm: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
-
     playerWrapper: {
         overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '15px',
         marginTop: '15px', height: 'auto', opacity: 1
@@ -312,7 +315,6 @@ const styles = {
     scrubberContainer: { flexGrow: 1, display: 'flex', alignItems: 'center' },
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
-
     receiptFooter: {
         textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6,
         display: 'flex', flexDirection: 'column', alignItems: 'center'

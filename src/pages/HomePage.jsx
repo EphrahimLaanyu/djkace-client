@@ -7,7 +7,7 @@ const HomePage = () => {
   return (
     <div style={styles.mainWrapper}>
       <Home/>
-      {/* <DJsPicks/> */}
+      <DJsPicks/>
       <About/>
     </div>
   );
