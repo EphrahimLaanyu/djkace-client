@@ -48,17 +48,38 @@ const Footer = () => {
             <ul style={styles.trackList}>
                 <li style={styles.trackItem}>
                     <span style={styles.trackNum}>A1.</span>
-                    <a href="https://instagram.com" style={styles.trackLink}>INSTAGRAM</a>
+                    <a 
+                        href="https://instagram.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={styles.trackLink}
+                    >
+                        INSTAGRAM
+                    </a>
                     <span style={styles.trackTime}>04:20</span>
                 </li>
                 <li style={styles.trackItem}>
                     <span style={styles.trackNum}>A2.</span>
-                    <a href="https://mixcloud.com" style={styles.trackLink}>MIXCLOUD</a>
+                    <a 
+                        href="https://mixcloud.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={styles.trackLink}
+                    >
+                        MIXCLOUD
+                    </a>
                     <span style={styles.trackTime}>03:45</span>
                 </li>
                 <li style={styles.trackItem}>
                     <span style={styles.trackNum}>A3.</span>
-                    <a href="https://twitter.com" style={styles.trackLink}>TWITTER / X</a>
+                    <a 
+                        href="https://twitter.com" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={styles.trackLink}
+                    >
+                        TWITTER / X
+                    </a>
                     <span style={styles.trackTime}>02:50</span>
                 </li>
             </ul>

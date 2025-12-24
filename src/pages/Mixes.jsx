@@ -4,6 +4,8 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudio } from '../context/AudioContext'; 
+// IMPORT FOOTER
+import Footer from './Footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -63,6 +65,39 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onTogg
                 
                 <span style={styles.timeDisplay}>
                     {formatTime(currentTime)} / {formatTime(displayDuration)}
+                </span>
+            </div>
+        </div>
+    );
+};
+
+// --- COMPONENT: INFINITE MARQUEE ---
+const MarqueeBand = () => {
+    const marqueeRef = useRef(null);
+
+    useGSAP(() => {
+        const marqueeTween = gsap.to(".marquee-content", {
+            xPercent: -100, 
+            repeat: -1,
+            duration: 20, 
+            ease: "none",
+        });
+    
+        const marqueeContainer = marqueeRef.current;
+        if (marqueeContainer) {
+            marqueeContainer.addEventListener("mouseenter", () => gsap.to(marqueeTween, { timeScale: 0.2, duration: 0.5 }));
+            marqueeContainer.addEventListener("mouseleave", () => gsap.to(marqueeTween, { timeScale: 1, duration: 0.5 }));
+        }
+    }, { scope: marqueeRef });
+
+    return (
+        <div style={styles.marqueeBand} ref={marqueeRef}>
+            <div style={styles.marqueeTrack}>
+                <span className="marquee-content" style={styles.marqueeText}>
+                    THANKS FOR VIBING • KEEP THE MUSIC LOUD • DEEJAY KACE • NAIROBI'S FINEST • ENJOY THE SITE • ALL RIGHTS RESERVED •&nbsp;
+                </span>
+                <span className="marquee-content" style={styles.marqueeText}>
+                    THANKS FOR VIBING • KEEP THE MUSIC LOUD • DEEJAY KACE • NAIROBI'S FINEST • ENJOY THE SITE • ALL RIGHTS RESERVED •&nbsp;
                 </span>
             </div>
         </div>
@@ -164,74 +199,83 @@ const Mixes = () => {
     if (loading) return <div style={styles.loader}>LOADING ARCHIVE...</div>;
 
     return (
-        <div ref={containerRef} style={styles.pageWrapper}>
-            <div style={styles.receiptHeader}>
-                <button onClick={() => navigate('/')} style={styles.backBtn}>
-                    ← RETURN TO HOME
-                </button>
-                <div className="brand-title" style={styles.brandTitle}>FULL ARCHIVE</div>
-                <div style={styles.brandSub}>COMPLETE MIX DATABASE</div>
-                <div style={styles.divider}>================================</div>
-                <div style={styles.colHeaders}>
-                    <span>ID</span>
-                    <span>TITLE // ARTIST</span>
-                    <span>BPM</span>
-                </div>
-                <div style={styles.divider}>--------------------------------</div>
-            </div>
-
-            <div style={styles.rollContainer}>
-                {tracks.map((track) => (
-                    <div 
-                        key={track.id} 
-                        ref={addToRefs}
-                        className="track-row"
-                        style={styles.row}
-                        onClick={() => toggleTrack(track)}
-                    >
-                        <div style={styles.rowData}>
-                            {/* IMAGE STAMP */}
-                            <div style={styles.coverWrapper}>
-                                <img 
-                                    src={track.cover} 
-                                    alt={track.title} 
-                                    className="track-cover" 
-                                    style={styles.coverImage} 
-                                />
-                                <span style={styles.qty}>
-                                    {track.index < 10 ? `0${track.index}` : track.index}
-                                </span>
-                            </div>
-
-                            <div style={styles.meta}>
-                                <div className="track-title" style={styles.title}>{track.title}</div>
-                                <div style={styles.artist}>{track.artist}</div>
-                            </div>
-                            <span style={styles.bpm}>{track.bpm}</span>
-                        </div>
-
-                        <ReceiptPlayer 
-                            isPlaying={playingId === track.id && isPlaying}
-                            currentTime={playingId === track.id ? currentTime : 0}
-                            duration={playingId === track.id ? duration : 0}
-                            totalDuration={trackDurations[track.id]} 
-                            onToggle={() => toggleTrack(track)}
-                            onSeek={seek}
-                            audioUrl={track.audio} 
-                        />
+        <div style={styles.mainContainer}>
+            {/* MIXES CONTENT */}
+            <div ref={containerRef} style={styles.pageWrapper}>
+                <div style={styles.receiptHeader}>
+                    <button onClick={() => navigate('/')} style={styles.backBtn}>
+                        ← RETURN TO HOME
+                    </button>
+                    <div className="brand-title" style={styles.brandTitle}>FULL ARCHIVE</div>
+                    <div style={styles.brandSub}>COMPLETE MIX DATABASE</div>
+                    <div style={styles.divider}>================================</div>
+                    <div style={styles.colHeaders}>
+                        <span>ID</span>
+                        <span>TITLE // ARTIST</span>
+                        <span>BPM</span>
                     </div>
-                ))}
+                    <div style={styles.divider}>--------------------------------</div>
+                </div>
+
+                <div style={styles.rollContainer}>
+                    {tracks.map((track) => (
+                        <div 
+                            key={track.id} 
+                            ref={addToRefs}
+                            className="track-row"
+                            style={styles.row}
+                            onClick={() => toggleTrack(track)}
+                        >
+                            <div style={styles.rowData}>
+                                {/* IMAGE STAMP */}
+                                <div style={styles.coverWrapper}>
+                                    <img 
+                                        src={track.cover} 
+                                        alt={track.title} 
+                                        className="track-cover" 
+                                        style={styles.coverImage} 
+                                    />
+                                    <span style={styles.qty}>
+                                        {track.index < 10 ? `0${track.index}` : track.index}
+                                    </span>
+                                </div>
+
+                                <div style={styles.meta}>
+                                    <div className="track-title" style={styles.title}>{track.title}</div>
+                                    <div style={styles.artist}>{track.artist}</div>
+                                </div>
+                                <span style={styles.bpm}>{track.bpm}</span>
+                            </div>
+
+                            <ReceiptPlayer 
+                                isPlaying={playingId === track.id && isPlaying}
+                                currentTime={playingId === track.id ? currentTime : 0}
+                                duration={playingId === track.id ? duration : 0}
+                                totalDuration={trackDurations[track.id]} 
+                                onToggle={() => toggleTrack(track)}
+                                onSeek={seek}
+                                audioUrl={track.audio} 
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <div style={styles.receiptFooter}>
+                    <div style={styles.divider}>--------------------------------</div>
+                    <div style={styles.totalRow}>
+                        <span>TOTAL RECORDS:</span>
+                        <span>{tracks.length}</span>
+                    </div>
+                    <div className="barcode" style={styles.barcode}>|| ||| |||| || ||| || |||||</div>
+                    <div style={styles.thankYou}>END OF TRANSMISSION</div>
+                </div>
             </div>
 
-            <div style={styles.receiptFooter}>
-                <div style={styles.divider}>--------------------------------</div>
-                <div style={styles.totalRow}>
-                    <span>TOTAL RECORDS:</span>
-                    <span>{tracks.length}</span>
-                </div>
-                <div className="barcode" style={styles.barcode}>|| ||| |||| || ||| || |||||</div>
-                <div style={styles.thankYou}>END OF TRANSMISSION</div>
-            </div>
+            {/* MARQUEE BAND (Static at bottom of list, before footer) */}
+            <MarqueeBand />
+
+            {/* FOOTER (Imported) */}
+            {/* <Footer /> */}
 
             <style>{`
                 .active-row .track-title { font-weight: 900 !important; letter-spacing: 1px; }
@@ -250,7 +294,24 @@ const Mixes = () => {
 
 // --- STYLES ---
 const styles = {
-    pageWrapper: { minHeight: '100vh', width: '100vw', backgroundColor: '#F1E9DB', color: '#111', fontFamily: '"Space Mono", "Courier New", monospace', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px 15px', overflowX: 'hidden' },
+    mainContainer: {
+        width: '100%',
+        minHeight: '100vh',
+        backgroundColor: '#F1E9DB',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    pageWrapper: { 
+        minHeight: '100vh', 
+        width: '100vw', 
+        color: '#111', 
+        fontFamily: '"Space Mono", "Courier New", monospace', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        padding: '100px 15px 40px', 
+        overflowX: 'hidden' 
+    },
     loader: { height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#E60000', fontFamily: 'monospace', letterSpacing: '2px' },
     receiptHeader: { textAlign: 'center', marginBottom: '40px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' },
     backBtn: { background: 'transparent', border: '1px solid #111', padding: '10px 20px', marginBottom: '30px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.8rem', transition: 'all 0.2s', ':hover': { background: '#111', color: '#fff' } },
@@ -308,7 +369,30 @@ const styles = {
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '600px', marginTop: '20px', opacity: 0.6 },
     totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '20px', padding: '0 5px' },
     barcode: { fontFamily: '"Libre Barcode 39 Text", cursive', fontSize: '2rem', letterSpacing: '4px', transform: 'scaleY(1.5)', marginBottom: '10px' },
-    thankYou: { fontSize: '0.8rem' }
+    thankYou: { fontSize: '0.8rem' },
+
+    // --- MARQUEE STYLES ---
+    marqueeBand: {
+        width: '100%',
+        height: '40px', 
+        backgroundColor: '#E60000',
+        display: 'flex', 
+        alignItems: 'center',
+        overflow: 'hidden', 
+        borderTop: '2px solid #111',
+    },
+    marqueeTrack: {
+        display: 'flex', 
+        whiteSpace: 'nowrap', 
+        width: 'fit-content'
+    },
+    marqueeText: {
+        fontSize: '1rem', fontWeight: '900', color: '#000',
+        fontFamily: '"Rajdhani", sans-serif', letterSpacing: '2px',
+        paddingRight: '50px',
+        flexShrink: 0,
+        display: 'block'
+    }
 };
 
 export default Mixes;
