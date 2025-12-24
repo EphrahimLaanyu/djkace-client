@@ -278,12 +278,11 @@ const styles = {
     rowData: {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'
     },
-    // IMAGE STYLES (Kept these as they are stylish)
     coverWrapper: {
         display: 'flex', alignItems: 'center', gap: '15px', flexShrink: 0
     },
     coverImage: {
-        width: '55px', height: '55px', objectFit: 'cover', // Slightly smaller to fit better in continuous list
+        width: '55px', height: '55px', objectFit: 'cover',
         border: '1px solid #111', 
         filter: 'grayscale(100%)', 
         transition: 'filter 0.3s',
