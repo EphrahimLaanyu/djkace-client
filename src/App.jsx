@@ -10,10 +10,12 @@ import Mixes from './pages/Mixes';
 import Navbar from './components/Navbar';
 import { AudioProvider } from './context/AudioContext';
 import Contact from './pages/Contacts';
+import ScrollToTop from './context/ScrollToTop';
 function App() {
   return (
     <AudioProvider>
       <Router>
+        <ScrollToTop />
         <Navbar />
         
         <main style={{ minHeight: '80vh' }}>
