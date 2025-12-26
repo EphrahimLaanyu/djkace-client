@@ -18,7 +18,6 @@ const formatTime = (seconds) => {
 };
 
 // --- COMPONENT: INLINE PLAYER ---
-// 1. Added 'title' to the props received here
 const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onToggle, onSeek, audioUrl, title }) => {
     const displayDuration = isPlaying ? duration : totalDuration;
 
@@ -56,8 +55,6 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onTogg
                             const link = document.createElement('a');
                             link.href = url;
                             
-                            // 2. UPDATED: Construct the filename using the title
-                            // We remove special characters to ensure it's a valid filename
                             const safeTitle = title ? title.replace(/[^a-z0-9 ]/gi, '') : `Mix_${Date.now()}`;
                             link.download = `DJ Kace - ${safeTitle}.mp3`;
                             
@@ -140,7 +137,7 @@ const Mixes = () => {
     const [loading, setLoading] = useState(true);
     const [trackDurations, setTrackDurations] = useState({});
 
-    // --- FIX: SCROLL TO TOP ON MOUNT ---
+    // --- SCROLL TO TOP ON MOUNT ---
     useLayoutEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -198,6 +195,31 @@ const Mixes = () => {
             });
         });
     }, { scope: containerRef, dependencies: [loading, tracks] });
+
+    // 4. *** MEDIA SESSION API (LOCK SCREEN ARTWORK) ***
+    useEffect(() => {
+        if (!playingId || tracks.length === 0) return;
+
+        const currentTrack = tracks.find(t => t.id === playingId);
+        
+        // This tells iOS/Android what to show on the lock screen
+        if (currentTrack && 'mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrack.title,
+                // We truncate slightly for the lock screen so it doesn't look messy if the description is huge
+                artist: currentTrack.artist.length > 50 ? currentTrack.artist.substring(0, 50) + "..." : currentTrack.artist,
+                album: "DJ Kace Archive",
+                artwork: [
+                    { src: currentTrack.cover, sizes: '96x96', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '128x128', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '192x192', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '256x256', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '384x384', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '512x512', type: 'image/jpeg' },
+                ]
+            });
+        }
+    }, [playingId, tracks]);
 
     const animateRow = (element, isActive) => {
         gsap.to(element, {
@@ -283,7 +305,6 @@ const Mixes = () => {
                                 onToggle={() => toggleTrack(track)}
                                 onSeek={seek}
                                 audioUrl={track.audio} 
-                                // 3. PASSED THE TITLE HERE
                                 title={track.title} 
                             />
                         </div>
