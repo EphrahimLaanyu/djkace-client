@@ -44,43 +44,60 @@ const Footer = () => {
       <div style={styles.linerNotes}>
          
          <div style={styles.tracklistBlock}>
-            <h4 style={styles.sideLabel}>SIDE A // SOCIALS</h4>
+            <h4 style={styles.sideLabel}>SOCIALS // CONTACT</h4>
             <ul style={styles.trackList}>
+                {/* INSTAGRAM */}
                 <li style={styles.trackItem}>
                     <span style={styles.trackNum}>A1.</span>
                     <a 
-                        href="https://instagram.com" 
+                        href="https://www.instagram.com/deejaykace/" 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         style={styles.trackLink}
                     >
-                        INSTAGRAM
+                        INSTAGRAM (@deejaykace)
                     </a>
-                    <span style={styles.trackTime}>04:20</span>
+                    <span style={styles.trackTime}>↗</span>
                 </li>
+
+                {/* TIKTOK */}
                 <li style={styles.trackItem}>
                     <span style={styles.trackNum}>A2.</span>
                     <a 
-                        href="https://mixcloud.com" 
+                        href="https://www.tiktok.com/@dj.kace" 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         style={styles.trackLink}
                     >
-                        MIXCLOUD
+                        TIKTOK (@dj.kace)
                     </a>
-                    <span style={styles.trackTime}>03:45</span>
+                    <span style={styles.trackTime}>↗</span>
                 </li>
+
+                {/* YOUTUBE */}
                 <li style={styles.trackItem}>
                     <span style={styles.trackNum}>A3.</span>
                     <a 
-                        href="https://twitter.com" 
+                        href="https://www.youtube.com/@DeeJayKace" 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         style={styles.trackLink}
                     >
-                        TWITTER / X
+                        YOUTUBE (@DeeJayKace)
                     </a>
-                    <span style={styles.trackTime}>02:50</span>
+                    <span style={styles.trackTime}>↗</span>
+                </li>
+
+                {/* EMAIL */}
+                <li style={styles.trackItem}>
+                    <span style={styles.trackNum}>B1.</span>
+                    <a 
+                        href="mailto:deejaykace@gmail.com" 
+                        style={styles.trackLink}
+                    >
+                        EMAIL (deejaykace@gmail.com)
+                    </a>
+                    <span style={styles.trackTime}>✉</span>
                 </li>
             </ul>
          </div>
@@ -96,8 +113,8 @@ const Footer = () => {
                     <span style={styles.role}>DEVELOPMENT & CODE</span>
                     {/* DEVELOPER SECTION */}
                     <div style={styles.devBadge}>
-                         <span style={styles.devName}>AGENCY NAME</span>
-                         <a href="mailto:hello@agency.com" style={styles.devLink}>hello@agency.com</a>
+                         <span style={styles.devName}>J & M</span>
+                         <a href="mailto:barcodetech@gmail.com" style={styles.devLink}>barcodetech@gmail.com</a>
                     </div>
                 </div>
                 <div style={styles.creditItem}>
@@ -206,10 +223,10 @@ const styles = {
   },
   trackNum: { fontWeight: 'bold', width: '40px' },
   trackLink: { 
-    flexGrow: 1, textDecoration: 'none', color: '#111', fontSize: '1.1rem', fontWeight: 'bold',
+    flexGrow: 1, textDecoration: 'none', color: '#111', fontSize: '1rem', fontWeight: 'bold',
     textTransform: 'uppercase', cursor: 'pointer'
   },
-  trackTime: { fontSize: '0.8rem', color: '#666' },
+  trackTime: { fontSize: '0.8rem', color: '#666', fontWeight: 'bold' },
 
   // Credits (Developer)
   creditsBlock: { marginBottom: '40px' },

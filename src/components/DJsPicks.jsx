@@ -219,7 +219,7 @@ const DJsPicks = () => {
                     <span>05</span>
                 </div>
                 <button onClick={() => navigate('/mixes')} style={styles.viewAllBtn} className="view-all-btn">
-                    VIEW ALL MIXES →
+                    VIEW & DOWNLOAD ALL MIXES →
                 </button>
                 <div className="barcode" style={styles.barcode}>||| || ||| | |||| ||| || |||||</div>
                 <div style={styles.thankYou}>THANK YOU FOR LISTENING</div>

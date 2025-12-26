@@ -4,10 +4,12 @@ import { useGSAP } from '@gsap/react';
 import Footer from './Footer';
 
 // --- IMPORT YOUR IMAGE ---
-import DjImage from '../assets/PAT01853-removebg-preview.png'; 
+import DjImage from '../assets/PAT01853-removebg-preview.png';
+import DjImage1 from '../assets/File_000-removebg-preview.png';
+import DjImage2 from '../assets/IMG_9811-removebg-preview.png';
 
 // --- FILMSTRIP CONFIGURATION ---
-const filmImages = [DjImage, DjImage, DjImage, DjImage];
+const filmImages = [DjImage, DjImage1, DjImage2, DjImage1];
 
 const Contact = () => {
   const containerRef = useRef(null);
@@ -45,7 +47,7 @@ const Contact = () => {
     const filmTween = gsap.to(".filmstrip", {
         yPercent: -50,
         ease: "none",
-        duration: 40, 
+        duration: 10, 
         repeat: -1
     });
 
