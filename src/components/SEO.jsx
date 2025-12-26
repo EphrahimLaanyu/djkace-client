@@ -1,95 +1,53 @@
-// src/components/SEO.jsx
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SEO = ({ title, description, url, image }) => {
-    // 1. GLOBAL CONFIGURATION
-    const siteTitle = "DJ Kace | Top DJ in Kenya";
-    const defaultDescription = "Deejay Kace is Kenya's premier DJ, specializing in Afrobeat, Hip Hop, and Dancehall mixes. Book the best DJ in Nairobi for events and weddings.";
-    const siteUrl = "https://djkace-client.vercel.app"; 
+const SEO = ({ title, description, url }) => {
+    // 1. HARDCODED URLS (To eliminate logic errors)
+    const siteUrl = "https://djkace-client.vercel.app";
+    const imageUrl = "https://djkace-client.vercel.app/social-card.png"; // Direct link to your PNG
 
-    // 2. IMAGE HANDLING (For WhatsApp/Social Previews)
-    // This looks for 'social-card.svg' in your public folder by default.
-    // If you pass a specific image (e.g. for a mix), it uses that instead.
-    const validImage = image 
-        ? (image.startsWith('http') ? image : `${siteUrl}${image}`) 
-        : `${siteUrl}/social-card.png`;
+    const defaultDescription = "Deejay Kace is Kenya's premier DJ, specializing in Afrobeat, Hip Hop, and Dancehall mixes.";
 
-    // 3. SCHEMA DATA (For Google "Sitelinks")
     const schemaData = {
         "@context": "https://schema.org",
         "@type": "Person",
         "name": "DJ Kace",
-        "alternateName": ["Deejay Kace", "Kace"],
         "url": siteUrl,
-        "jobTitle": "DJ",
-        "image": validImage, // Links to your SVG
+        "image": imageUrl,
         "sameAs": [
             "https://www.instagram.com/deejaykace",
-            "https://twitter.com/deejaykace",
-            "https://www.tiktok.com/@dj.kace",
             "https://www.youtube.com/@DeeJayKace"
         ],
-        "description": "Professional DJ based in Nairobi, Kenya."
-    };
-
-    // 4. NAVIGATION SCHEMA
-    const navigationSchema = {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "itemListElement": [
-            {
-                "@type": "SiteNavigationElement",
-                "position": 1,
-                "name": "Latest Mixes",
-                "description": "Download and stream the latest DJ Kace mixes.",
-                "url": `${siteUrl}/mixes`
-            },
-            {
-                "@type": "SiteNavigationElement",
-                "position": 2,
-                "name": "Book DJ Kace",
-                "description": "Contact information for bookings and events in Kenya.",
-                "url": `${siteUrl}/contacts`
-            },
-            {
-                "@type": "SiteNavigationElement",
-                "position": 3,
-                "name": "About Kace",
-                "description": "Learn about Nairobi's top DJ.",
-                "url": `${siteUrl}/about`
-            }
-        ]
+        "description": defaultDescription
     };
 
     return (
         <Helmet>
-            {/* Standard Meta Tags */}
-            <title>{title ? `${title} | DJ Kace` : siteTitle}</title>
+            {/* Standard Tags */}
+            <title>{title ? `${title} | DJ Kace` : "DJ Kace | Top DJ in Kenya"}</title>
             <meta name="description" content={description || defaultDescription} />
-            <meta name="keywords" content="DJ Kace, Deejay Kace, DJs in Kenya, Nairobi DJ, Best DJ in Kenya, Kenyan Mixes, Afrobeat DJ" />
             <link rel="canonical" href={url || siteUrl} />
 
-            {/* Open Graph (WhatsApp / Facebook) */}
+            {/* OPEN GRAPH (Crucial for WhatsApp) */}
             <meta property="og:type" content="website" />
-            <meta property="og:title" content={title || siteTitle} />
+            <meta property="og:title" content={title || "DJ Kace | Top DJ in Kenya"} />
             <meta property="og:description" content={description || defaultDescription} />
             <meta property="og:url" content={url || siteUrl} />
             
-            {/* The SVG Image Link */}
-            <meta property="og:image" content={validImage} />
+            {/* FORCE THE IMAGE */}
+            <meta property="og:image" content={imageUrl} />
+            <meta property="og:image:secure_url" content={imageUrl} />
+            <meta property="og:image:type" content="image/png" />
             <meta property="og:image:width" content="1200" />
-            <meta property="og:image:height" content="1200" />
+            <meta property="og:image:height" content="630" />
 
-            {/* Twitter Card */}
+            {/* Twitter */}
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={title || siteTitle} />
+            <meta name="twitter:title" content={title || "DJ Kace"} />
             <meta name="twitter:description" content={description || defaultDescription} />
-            <meta name="twitter:image" content={validImage} />
+            <meta name="twitter:image" content={imageUrl} />
 
-            {/* Structured Data Scripts */}
             <script type='application/ld+json'>{JSON.stringify(schemaData)}</script>
-            <script type='application/ld+json'>{JSON.stringify(navigationSchema)}</script>
         </Helmet>
     );
 };
