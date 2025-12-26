@@ -75,7 +75,7 @@ const DJsPicks = () => {
                     id: t.id,
                     index: i + 1,
                     title: t.title,
-                    artist: t.description?.substring(0, 25) || "Deejay Kace",
+                    artist: t.description?.substring(0, 100) || "Deejay Kace",
                     bpm: Math.floor(Math.random() * (128 - 90) + 90),
                     audio: t.audio_url,
                     cover: t.image_url 
@@ -98,11 +98,9 @@ const DJsPicks = () => {
         fetchTracks();
     }, []);
 
-    // 2. *** THE FIX: REFRESH SCROLLTRIGGER AFTER DATA LOADS ***
-    // This ensures GSAP knows the new page height after the API data expands the DOM.
+    // 2. REFRESH SCROLLTRIGGER AFTER DATA LOADS
     useEffect(() => {
         if (!loading && tracks.length > 0) {
-            // Slight delay to ensure the DOM has fully painted the new height
             const timer = setTimeout(() => {
                 ScrollTrigger.refresh();
             }, 200);
@@ -119,8 +117,8 @@ const DJsPicks = () => {
             if (!item) return;
             ScrollTrigger.create({
                 trigger: item,
-                start: "top 80%", 
-                end: "bottom 20%", 
+                start: "top 60%", 
+                end: "bottom 40%", 
                 toggleClass: { targets: item, className: "active-row" },
                 onEnter: () => animateRow(item, true),
                 onLeave: () => animateRow(item, false),
@@ -130,10 +128,40 @@ const DJsPicks = () => {
         });
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
+    // 4. *** NEW: MEDIA SESSION API (LOCK SCREEN ARTWORK) ***
+    useEffect(() => {
+        if (!playingId || tracks.length === 0) return;
+
+        const currentTrack = tracks.find(t => t.id === playingId);
+        
+        // This tells iOS/Android what to show on the lock screen
+        if (currentTrack && 'mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artist,
+                album: "DJ Kace Latest Mixes",
+                artwork: [
+                    { src: currentTrack.cover, sizes: '96x96', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '128x128', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '192x192', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '256x256', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '384x384', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '512x512', type: 'image/jpeg' },
+                ]
+            });
+
+            // Optional: Connect lock screen controls to your app logic
+            /* navigator.mediaSession.setActionHandler('play', () => toggleTrack(currentTrack));
+            navigator.mediaSession.setActionHandler('pause', () => toggleTrack(currentTrack));
+            */
+        }
+    }, [playingId, tracks]);
+
+
     const animateRow = (element, isActive) => {
         gsap.to(element, {
             scale: isActive ? 1.02 : 1,
-            opacity: isActive ? 1 : 0.7,
+            opacity: isActive ? 1 : 0.6,
             color: isActive ? "#E60000" : "#111",
             borderBottomColor: isActive ? "#E60000" : "#ccc",
             duration: 0.3,
@@ -194,7 +222,7 @@ const DJsPicks = () => {
 
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
-                                    <div style={styles.artist}>{track.artist}</div>
+                                    <div className="track-artist" style={styles.artist}>{track.artist}</div>
                                 </div>
                                 <span style={styles.bpm}>{track.bpm}</span>
                             </div>
@@ -226,8 +254,17 @@ const DJsPicks = () => {
             </div>
 
             <style>{`
-                .active-row .track-title { font-weight: 900 !important; letter-spacing: 1px; }
                 * { box-sizing: border-box; }
+                .active-row .track-title { 
+                    font-weight: 900 !important; 
+                    letter-spacing: 1px; 
+                    white-space: normal !important; 
+                    overflow: visible !important;
+                }
+                .active-row .track-artist {
+                    white-space: normal !important;
+                    overflow: visible !important;
+                }
                 .view-all-btn:hover { background-color: #E60000 !important; color: #fff !important; }
                 @media (max-width: 600px) {
                     .brand-title { font-size: 1.5rem !important; }
@@ -276,9 +313,9 @@ const styles = {
         boxShadow: 'none', 
         cursor: 'pointer',
         transformOrigin: 'center center',
-        overflow: 'hidden',
         width: '100%',
-        willChange: 'transform, opacity'
+        willChange: 'transform, opacity',
+        position: 'relative'
     },
     rowData: {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'
@@ -294,9 +331,34 @@ const styles = {
         borderRadius: '2px'
     },
     qty: { opacity: 0.5, fontSize: '0.8rem', fontWeight: 'bold' },
-    meta: { flexGrow: 1, paddingLeft: '15px', paddingRight: '10px' },
-    title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.1' },
-    artist: { fontSize: '0.8rem', opacity: 0.7 },
+    meta: { 
+        flexGrow: 1, 
+        paddingLeft: '15px', 
+        paddingRight: '10px', 
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+    },
+    title: { 
+        fontSize: '1.2rem', 
+        fontWeight: 'bold', 
+        textTransform: 'uppercase', 
+        marginBottom: '4px', 
+        lineHeight: '1.2',
+        whiteSpace: 'nowrap',         
+        overflow: 'hidden',           
+        textOverflow: 'ellipsis',     
+        transition: 'all 0.3s ease'   
+    },
+    artist: { 
+        fontSize: '0.8rem', 
+        opacity: 0.7,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        transition: 'all 0.3s ease'
+    },
     bpm: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
     playerWrapper: {
         overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '15px',
