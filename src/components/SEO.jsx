@@ -6,14 +6,14 @@ const SEO = ({ title, description, url, image }) => {
     // 1. GLOBAL CONFIGURATION
     const siteTitle = "DJ Kace | Top DJ in Kenya";
     const defaultDescription = "Deejay Kace is Kenya's premier DJ, specializing in Afrobeat, Hip Hop, and Dancehall mixes. Book the best DJ in Nairobi for events and weddings.";
-    const siteUrl = "https://deejaykace.co.ke"; 
+    const siteUrl = "https://djkace-client.vercel.app"; 
 
     // 2. IMAGE HANDLING (For WhatsApp/Social Previews)
     // This looks for 'social-card.svg' in your public folder by default.
     // If you pass a specific image (e.g. for a mix), it uses that instead.
     const validImage = image 
         ? (image.startsWith('http') ? image : `${siteUrl}${image}`) 
-        : `${siteUrl}/social-card.svg`;
+        : `${siteUrl}/social-card.png`;
 
     // 3. SCHEMA DATA (For Google "Sitelinks")
     const schemaData = {
