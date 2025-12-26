@@ -38,7 +38,7 @@ const Footer = () => {
   }, { scope: containerRef });
 
   return (
-    <footer ref={containerRef} style={styles.footerWrapper}>
+    <footer ref={containerRef} style={styles.footerWrapper} itemScope itemType="https://schema.org/WPFooter">
       
       {/* LEFT SIDE: THE LINER NOTES (Content) */}
       <div style={styles.linerNotes}>
@@ -52,8 +52,9 @@ const Footer = () => {
                     <a 
                         href="https://www.instagram.com/deejaykace/" 
                         target="_blank" 
-                        rel="noopener noreferrer" 
+                        rel="noopener noreferrer me" // "me" tells Google this is YOU
                         style={styles.trackLink}
+                        itemProp="sameAs" // Schema connection
                     >
                         INSTAGRAM (@deejaykace)
                     </a>
@@ -66,8 +67,9 @@ const Footer = () => {
                     <a 
                         href="https://www.tiktok.com/@dj.kace" 
                         target="_blank" 
-                        rel="noopener noreferrer" 
+                        rel="noopener noreferrer me" 
                         style={styles.trackLink}
+                        itemProp="sameAs"
                     >
                         TIKTOK (@dj.kace)
                     </a>
@@ -80,8 +82,9 @@ const Footer = () => {
                     <a 
                         href="https://www.youtube.com/@DeeJayKace" 
                         target="_blank" 
-                        rel="noopener noreferrer" 
+                        rel="noopener noreferrer me" 
                         style={styles.trackLink}
+                        itemProp="sameAs"
                     >
                         YOUTUBE (@DeeJayKace)
                     </a>
@@ -94,6 +97,7 @@ const Footer = () => {
                     <a 
                         href="mailto:deejaykace@gmail.com" 
                         style={styles.trackLink}
+                        itemProp="email"
                     >
                         EMAIL (deejaykace@gmail.com)
                     </a>
@@ -107,7 +111,7 @@ const Footer = () => {
             <div style={styles.creditGrid}>
                 <div style={styles.creditItem}>
                     <span style={styles.role}>EXECUTIVE PRODUCER</span>
-                    <span style={styles.name}>DEEJAY KACE</span>
+                    <span style={styles.name} itemProp="producer">DEEJAY KACE</span>
                 </div>
                 <div style={styles.creditItem}>
                     <span style={styles.role}>DEVELOPMENT & CODE</span>

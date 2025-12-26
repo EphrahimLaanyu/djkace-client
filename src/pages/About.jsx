@@ -50,15 +50,21 @@ const About = () => {
   }, { scope: containerRef });
 
   return (
-    <section ref={containerRef} style={styles.analyzerSection}>
+    // SEO: Define this section as a Service Description
+    <section ref={containerRef} style={styles.analyzerSection} itemScope itemType="https://schema.org/Service">
         
         {/* 1. CONTENT LAYER (Hidden Behind Bars initially) */}
         <div ref={contentRef} style={styles.contentLayer}>
             <div style={styles.textContent}>
                 <h4 style={styles.techHeader}>SYSTEM CHECK // 2025</h4>
-                <h2 style={styles.mainHeader}>PRECISION<br/>SOUND</h2>
+                
+                {/* SEO: Main Service Name */}
+                <h2 style={styles.mainHeader} itemProp="name">PRECISION<br/>SOUND</h2>
+                
                 <div style={styles.separator}></div>
-                <p style={styles.desc}>
+                
+                {/* SEO: Service Description */}
+                <p style={styles.desc} itemProp="description">
                     Just like a frequency spectrum, the set is calculated.
                     High highs. Deep lows. No distortion.
                     Experience the technical side of the African Mzungu.
@@ -68,7 +74,7 @@ const About = () => {
                 <div style={styles.techGrid}>
                     <div style={styles.techItem}>
                         <span style={styles.label}>FORMAT</span>
-                        <span style={styles.value}>DIGITAL / VINYL</span>
+                        <span style={styles.value} itemProp="serviceType">DIGITAL / VINYL</span>
                     </div>
                     <div style={styles.techItem}>
                         <span style={styles.label}>RANGE</span>
@@ -76,7 +82,7 @@ const About = () => {
                     </div>
                     <div style={styles.techItem}>
                         <span style={styles.label}>OUTPUT</span>
-                        <span style={styles.value}>HIGH FIDELITY</span>
+                        <span style={styles.value} itemProp="serviceQuality">HIGH FIDELITY</span>
                     </div>
                 </div>
             </div>

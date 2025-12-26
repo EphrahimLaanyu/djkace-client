@@ -3,10 +3,23 @@ import Home from './Home';
 import DJsPicks from '../components/DJsPicks';
 import About from './About';
 import Footer from './Footer';
+// IMPORT SEO COMPONENT
+import SEO from '../components/SEO';
 
 const HomePage = () => {
   return (
     <div style={styles.mainWrapper}>
+      {/* SEO CONFIGURATION:
+          - Sets the title to target "DJ Kace" and "Kenya".
+          - Description includes key terms for ranking (Nairobi, Mixes, Booking).
+          - URL matches your actual domain for authority.
+      */}
+      <SEO 
+        title="Home" 
+        description="The official website of Deejay Kace. Voted one of the top DJs in Kenya. Stream the latest Afrobeat, Hiphop and Dancehall mixes, check event dates, and book the best DJ in Nairobi."
+        url="https://deejaykace.co.ke"
+      />
+
       <Home/>
       <DJsPicks/>
       <About/>

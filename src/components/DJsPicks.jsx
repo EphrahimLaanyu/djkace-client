@@ -4,6 +4,8 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudio } from '../context/AudioContext';
+// SEO IMPORT
+import { Helmet } from 'react-helmet-async';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -128,35 +130,28 @@ const DJsPicks = () => {
         });
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
-    // 4. *** NEW: MEDIA SESSION API (LOCK SCREEN ARTWORK) ***
+    // 4. MEDIA SESSION API
     useEffect(() => {
         if (!playingId || tracks.length === 0) return;
 
         const currentTrack = tracks.find(t => t.id === playingId);
         
-        // This tells iOS/Android what to show on the lock screen
         if (currentTrack && 'mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrack.title,
                 artist: currentTrack.artist,
                 album: "DJ Kace Latest Mixes",
                 artwork: [
-                    { src: currentTrack.cover, sizes: '96x96', type: 'image/jpeg' },
-                    { src: currentTrack.cover, sizes: '128x128', type: 'image/jpeg' },
-                    { src: currentTrack.cover, sizes: '192x192', type: 'image/jpeg' },
-                    { src: currentTrack.cover, sizes: '256x256', type: 'image/jpeg' },
-                    { src: currentTrack.cover, sizes: '384x384', type: 'image/jpeg' },
-                    { src: currentTrack.cover, sizes: '512x512', type: 'image/jpeg' },
+                    { src: currentTrack.cover, sizes: '96x96' },
+                    { src: currentTrack.cover, sizes: '128x128' },
+                    { src: currentTrack.cover, sizes: '192x192' },
+                    { src: currentTrack.cover, sizes: '256x256' },
+                    { src: currentTrack.cover, sizes: '384x384' },
+                    { src: currentTrack.cover, sizes: '512x512' },
                 ]
             });
-
-            // Optional: Connect lock screen controls to your app logic
-            /* navigator.mediaSession.setActionHandler('play', () => toggleTrack(currentTrack));
-            navigator.mediaSession.setActionHandler('pause', () => toggleTrack(currentTrack));
-            */
         }
     }, [playingId, tracks]);
-
 
     const animateRow = (element, isActive) => {
         gsap.to(element, {
@@ -183,10 +178,38 @@ const DJsPicks = () => {
         if (el && !itemsRef.current.includes(el)) itemsRef.current.push(el);
     };
 
+    // --- SEO: GENERATE MUSIC SCHEMA ---
+    // This tells Google exactly what tracks are on this list
+    const musicSchema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": tracks.map((track, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "MusicRecording",
+                "name": track.title,
+                "byArtist": {
+                    "@type": "Person",
+                    "name": "DJ Kace"
+                },
+                "duration": trackDurations[track.id] ? `PT${Math.floor(trackDurations[track.id])}S` : undefined,
+                "url": "https://djkace.com/mixes" // Replace with actual URL
+            }
+        }))
+    };
+
     if (loading) return <div style={styles.loader}>PRINTING RECEIPT...</div>;
 
     return (
         <div ref={containerRef} style={styles.pageWrapper}>
+            {/* INJECT SCHEMA */}
+            <Helmet>
+                <script type="application/ld+json">
+                    {JSON.stringify(musicSchema)}
+                </script>
+            </Helmet>
+
             <div style={styles.receiptHeader}>
                 <div className="brand-title" style={styles.brandTitle}>DJ KACE //LATEST MIXES</div>
                 <div style={styles.brandSub}>NAIROBI, KENYA • EST 2025</div>
@@ -213,7 +236,7 @@ const DJsPicks = () => {
                                 <div style={styles.coverWrapper}>
                                     <img 
                                         src={track.cover} 
-                                        alt={track.title} 
+                                        alt={`Cover Art for ${track.title}`} // Improved SEO Alt
                                         className="track-cover"
                                         style={styles.coverImage} 
                                     />

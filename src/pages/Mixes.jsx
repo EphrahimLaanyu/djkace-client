@@ -6,6 +6,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudio } from '../context/AudioContext'; 
 // IMPORT FOOTER
 import Footer from './Footer';
+// IMPORT SEO
+import SEO from '../components/SEO';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -196,15 +198,13 @@ const Mixes = () => {
         });
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
-    // 4. *** MEDIA SESSION API (FIXED FOR MIXED IMAGE TYPES) ***
+    // 4. MEDIA SESSION API (Lock Screen)
     useEffect(() => {
         if (!playingId || tracks.length === 0) return;
 
         const currentTrack = tracks.find(t => t.id === playingId);
         
         if (currentTrack && 'mediaSession' in navigator) {
-            // FIX: Removed 'type: image/jpeg' because if the image is PNG, iOS will hide it.
-            // By removing the type, we let the OS detect it automatically.
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrack.title,
                 artist: currentTrack.artist.length > 50 ? currentTrack.artist.substring(0, 50) + "..." : currentTrack.artist,
@@ -250,6 +250,13 @@ const Mixes = () => {
 
     return (
         <div style={styles.mainContainer}>
+            {/* SEO TAGS */}
+            <SEO 
+                title="Mixes" 
+                description="Stream and download the hottest DJ Kace mixes. Featuring the best of Afrobeat, Dancehall, and Hip Hop in Kenya." 
+                url="https://deejaykace.co.ke/mixes"
+            />
+
             {/* MIXES CONTENT */}
             <div ref={containerRef} style={styles.pageWrapper}>
                 <div style={styles.receiptHeader}>

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom'; // Added Link
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -21,7 +21,7 @@ const Navbar = () => {
   const phase = useRef(0); 
   const mouseX = useRef(0); 
 
-  // --- 1. SMART HIDE ANIMATION (UPDATED) ---
+  // --- 1. SMART HIDE ANIMATION ---
   useGSAP(() => {
     const anim = gsap.from(containerRef.current, { 
       yPercent: -100,
@@ -30,7 +30,7 @@ const Navbar = () => {
       ease: "power3.out"
     }).progress(1);
 
-    // Auto-hide Logic: Only hide if we are NOT at the top
+    // Auto-hide Logic
     let hideTimer = gsap.delayedCall(1.5, () => {
         if (window.scrollY > 50) { 
             anim.reverse();
@@ -40,11 +40,10 @@ const Navbar = () => {
     const showNavbar = () => {
         anim.play();
         hideTimer.restart(true);
-        hideTimer.pause(); // Pause timer while hovering
+        hideTimer.pause(); 
     };
 
     const hideNavbar = () => {
-        // UPDATED: If at the top (less than 50px scroll), don't hide
         if (window.scrollY <= 50) {
             hideTimer.pause();
             return;
@@ -58,17 +57,15 @@ const Navbar = () => {
       end: 99999,
       onUpdate: (self) => {
         if (self.direction === -1) {
-            // Scroll Up: Show immediately
+            // Scroll Up
             anim.play(); 
-            
-            // UPDATED: If we scrolled back to the top, pause the hide timer
             if (window.scrollY <= 50) {
                 hideTimer.pause();
             } else {
-                hideTimer.restart(true); // Otherwise, start countdown to hide
+                hideTimer.restart(true); 
             }
         } else {
-            // Scroll Down: Hide immediately
+            // Scroll Down
             anim.reverse(); 
         }
       }
@@ -79,13 +76,11 @@ const Navbar = () => {
     navEl.addEventListener("mouseenter", showNavbar);
     navEl.addEventListener("mouseleave", hideNavbar);
 
-    // Mouse Move Logic (Edge case)
     const handleMouseMove = (e) => {
         if (e.clientY < 10) showNavbar();
     };
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Cleanup
     return () => {
         navEl.removeEventListener("mouseenter", showNavbar);
         navEl.removeEventListener("mouseleave", hideNavbar);
@@ -96,22 +91,17 @@ const Navbar = () => {
   }, { scope: containerRef });
 
   // --- 2. NAVIGATION HANDLER ---
-  const handleNavigation = (id, path) => {
-    if (path && path !== '/') {
-      navigate(path);
-      return;
+  const handleNavigation = (e, id, path) => {
+    // We allow the Link to handle the URL change, but we intercept for smooth scrolling
+    // or specific logic if we are already on the page.
+    
+    if (location.pathname === path && path === '/') {
+       e.preventDefault(); // Prevent reload if already on home
+       const element = document.getElementById(id);
+       if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+       else window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    if (location.pathname === '/') {
-      const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      else window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      navigate('/');
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    }
+    // For other pages, we let the <Link> do its job naturally
   };
 
   // --- 3. CANVAS ENGINE ---
@@ -189,23 +179,27 @@ const Navbar = () => {
   ];
 
   return (
-    <div ref={containerRef} style={styles.navWrapper}>
+    // SEO: Define this region as SiteNavigationElement
+    <nav ref={containerRef} style={styles.navWrapper} itemScope itemType="https://schema.org/SiteNavigationElement">
       
       <div style={styles.bgGradient}></div>
       <canvas ref={canvasRef} style={styles.canvas} />
 
       <div className="links-container" style={styles.linksContainer}>
         {navItems.map((item, i) => (
-            <button 
+            // SEO FIX: Changed <button> to <Link> (renders as <a>) so Google can crawl the site structure
+            <Link 
                 key={i}
-                onClick={() => handleNavigation(item.id, item.path)} 
+                to={item.path}
+                onClick={(e) => handleNavigation(e, item.id, item.path)} 
                 className="nav-link"
                 style={styles.link}
                 onMouseEnter={onLinkEnter}
                 onMouseLeave={onLinkLeave}
+                itemProp="url" // Schema prop
             >
-                {item.label}
-            </button>
+                <span itemProp="name">{item.label}</span>
+            </Link>
         ))}
       </div>
 
@@ -230,7 +224,7 @@ const Navbar = () => {
         }
       `}</style>
 
-    </div>
+    </nav>
   );
 };
 

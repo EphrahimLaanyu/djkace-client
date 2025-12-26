@@ -1,7 +1,9 @@
-import React, { useRef, useState, useLayoutEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Footer from './Footer';
+// IMPORT SEO
+import SEO from '../components/SEO';
 
 // --- IMPORT YOUR IMAGE ---
 import DjImage from '../assets/PAT01853-removebg-preview.png';
@@ -93,12 +95,20 @@ const Contact = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
         
-        <section ref={containerRef} style={styles.pageWrapper}>
+        {/* SEO CONFIGURATION */}
+        <SEO 
+            title="Bookings & Contact" 
+            description="Book DJ Kace for your next event in Nairobi or across Kenya. Available for Weddings, Corporate Events, and Club Gigs. Contact the best DJ in Kenya today."
+            url="https://deejaykace.co.ke/contacts"
+        />
+
+        {/* Define Schema for Contact Page */}
+        <section ref={containerRef} style={styles.pageWrapper} itemScope itemType="https://schema.org/ContactPage">
         
         {/* --- LEFT SIDE: THE FORM --- */}
         <div className="sleeve-side" style={styles.sleeveContainer}>
             <div style={styles.headerBlock}>
-                <h2 style={styles.albumTitle}>THE CONTACT SESSIONS</h2>
+                <h2 style={styles.albumTitle} itemProp="headline">THE CONTACT SESSIONS</h2>
                 <div style={styles.albumSub}>VOL. 1 • 2025 • STEREO</div>
                 <div style={styles.divider}>====================================</div>
             </div>
@@ -277,7 +287,7 @@ const styles = {
     minWidth: '320px', 
     zIndex: 2,
     backgroundColor: '#F1E9DB',
-    className: 'sleeve-side' // Added for targeting
+    className: 'sleeve-side' 
   },
   headerBlock: { marginBottom: '40px' },
   albumTitle: { fontSize: '2.5rem', fontWeight: '900', lineHeight: '1', marginBottom: '10px', letterSpacing: '-1px', className: 'albumTitle' },
@@ -318,7 +328,7 @@ const styles = {
       zIndex: 1,
       overflow: 'hidden', 
       backgroundColor: '#F1E9DB',
-      className: 'info-side' // Added for targeting
+      className: 'info-side' 
   },
   
   filmstrip: {
