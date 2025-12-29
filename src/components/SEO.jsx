@@ -3,8 +3,8 @@ import { Helmet } from 'react-helmet-async';
 
 const SEO = ({ title, description, url }) => {
     // 1. HARDCODED URLS (To eliminate logic errors)
-    const siteUrl = "https://djkace-client.vercel.app";
-    const imageUrl = "https://djkace-client.vercel.app/social-card.png"; // Direct link to your PNG
+    const siteUrl = "https://deejaykace.co.ke";
+    const imageUrl = "https://deejaykace.co.ke/social-card.png"; // Direct link to your PNG
 
     const defaultDescription = "Deejay Kace is Kenya's premier DJ, specializing in Afrobeat, Hip Hop, and Dancehall mixes.";
 

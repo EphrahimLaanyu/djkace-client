@@ -18,32 +18,27 @@ const Home = () => {
     gsap.set(".orbit-text", { opacity: 0 });
     gsap.set(".audio-rings", { opacity: 0, scale: 0.5 });
     
-    // --- PERFORMANCE OPTIMIZATION ---
-    // Tell browser to prepare GPU for these elements
     gsap.set([".dj-hero", ".audio-rings", ".orbit-text"], { 
         force3D: true 
     });
 
-    // 2. DESKTOP ANIMATION (Full Quality)
+    // 2. DESKTOP ANIMATION (Interactive Mouse Tilt)
     mm.add("(min-width: 769px)", () => {
         gsap.set(".dj-hero", { 
             opacity: 0, 
             scale: 0.8, 
-            filter: "blur(10px) grayscale(100%) contrast(1.1)" // Blur allowed on Desktop
+            filter: "blur(10px) grayscale(100%) contrast(1.1)"
         });
 
         const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
 
         tl.to(".dj-hero", { 
-            opacity: 1, 
-            scale: 1, 
-            filter: "blur(0px) grayscale(100%) contrast(1.1)", 
-            duration: 2 
+            opacity: 1, scale: 1, filter: "blur(0px) grayscale(100%) contrast(1.1)", duration: 2 
         })
         .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
         .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
         
-        // Mouse Tilt (Desktop Only)
+        // --- MOUSE TILT LOGIC ---
         const handleMouseMove = (e) => {
             const { innerWidth, innerHeight } = window;
             const x = (e.clientX / innerWidth - 0.5) * 2;
@@ -60,74 +55,71 @@ const Home = () => {
           return () => window.removeEventListener("mousemove", handleMouseMove);
     });
 
-    // 3. MOBILE ANIMATION (High Performance)
+    // 3. MOBILE ANIMATION (Auto-Floating Camera Effect)
     mm.add("(max-width: 768px)", () => {
-        // NO BLUR FILTER ON MOBILE - This is the #1 cause of lag
         gsap.set(".dj-hero", { 
             opacity: 0, 
             scale: 0.8, 
-            filter: "grayscale(100%) contrast(1.1)" // Removed Blur
+            filter: "grayscale(100%) contrast(1.1)" 
         });
 
+        // Intro Animation
         const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
+        tl.to(".dj-hero", { opacity: 1, scale: 1, duration: 1.5 })
+          .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
+          .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
 
-        tl.to(".dj-hero", { 
-            opacity: 1, 
-            scale: 1, 
-            // We do not animate the filter on mobile, just opacity/scale
-            duration: 1.5 
-        })
-        .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
-        .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
+        // --- NEW: AUTO-FLOAT ANIMATION ---
+        // Since there is no mouse, we gently rock the container automatically
+        // to show off the 3D depth.
+        
+        // 1. Rock the rings/text
+        gsap.to(tiltRef.current, {
+            rotationX: 10,  // Tilt up/down
+            rotationY: 15,  // Tilt left/right
+            duration: 4,
+            repeat: -1,
+            yoyo: true,     // Go back and forth
+            ease: "sine.inOut"
+        });
+
+        // 2. Gently move the DJ image in opposite direction for parallax
+        gsap.to(".dj-hero", {
+            y: -15,
+            rotationZ: 2,
+            duration: 5,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+        });
     });
 
     // 4. INFINITE ROTATIONS (Common)
-    // Use force3D: true to keep it on the GPU
-    gsap.to(ringRef.current, { 
-        rotationY: 360, 
-        duration: 20, 
-        repeat: -1, 
-        ease: "none",
-        force3D: true 
-    });
-    
-    gsap.to(audioRingsRef.current, { 
-        rotationZ: 360, 
-        duration: 40, 
-        repeat: -1, 
-        ease: "none",
-        force3D: true
-    });
+    gsap.to(ringRef.current, { rotationY: 360, duration: 20, repeat: -1, ease: "none", force3D: true });
+    gsap.to(audioRingsRef.current, { rotationZ: 360, duration: 40, repeat: -1, ease: "none", force3D: true });
 
   }, { scope: container });
 
-  // --- ORBIT TEXT HELPER ---
-  const phrase = "DEEJAY KACE • AFRICAN MZUNGU • ";
+  const phrase = "DEEJAY KACE • THE AFRICAN MZUNGU • ";
   const textArray = new Array(4).fill(phrase).join("").split("");
   const angleStep = 360 / textArray.length;
 
   return (
     <div ref={container} style={styles.wrapper}>
-      
-      {/* Background */}
       <div style={styles.noise}></div>
       <div style={styles.vignette}></div>
 
-      {/* 3D SCENE */}
       <div style={styles.scene}>
         
-        {/* 1. DJ HERO */}
         <img src={djImage} className="dj-hero" alt="DJ Kace" style={styles.djImage} />
 
-        {/* 2. TILT WRAPPER */}
         <div ref={tiltRef} style={styles.tiltWrapper}>
-            
             {/* AUDIO RINGS */}
             <div ref={audioRingsRef} className="audio-rings" style={styles.audioRingsContainer}>
-               <div style={styles.ringOuter}></div>
-               <div style={styles.ringDashed}></div>
-               <div style={styles.ringMiddle}></div>
-               <div style={styles.ringInner}></div>
+               <div style={styles.ringOuter}></div>  
+               <div style={styles.ringDashed}></div> 
+               <div style={styles.ringMiddle}></div> 
+               <div style={styles.ringInner}></div>  
             </div>
 
             {/* TEXT RING */}
@@ -141,14 +133,13 @@ const Home = () => {
                 </span>
               ))}
             </div>
-
         </div>
       </div>
 
-      <div style={styles.bottomLeft}>NAIROBI // KE</div>
+      <div style={styles.bottomLeft}>NAIROBI // <span style={{ color: '#009933' }}>KE</span></div>
       <div style={styles.bottomRight}>EST. 2025</div>
 
-      {/* --- RESPONSIVE STYLES INJECTION --- */}
+      {/* --- RESPONSIVE STYLES --- */}
       <style>{`
         :root {
           --orbit-radius: 450px;
@@ -156,13 +147,9 @@ const Home = () => {
           --font-size: 3rem;
         }
 
-        /* PERFORMANCE FIX: 
-           will-change tells the browser these elements will move,
-           so it puts them on their own compositor layer.
-        */
         .dj-hero, .audio-rings, .orbit-text, .ringContainer {
             will-change: transform, opacity;
-            backface-visibility: hidden; /* Helps mobile render smoother */
+            backface-visibility: hidden;
         }
 
         @media (max-width: 1024px) {
@@ -182,16 +169,15 @@ const Home = () => {
           
           .dj-hero {
             height: 60% !important; 
-            bottom: 10% !important;
+            bottom: 12% !important; /* Raised slightly to clear nav bars */
           }
 
           .bottom-text {
-            font-size: 0.6rem !important;
+            font-size: 0.7rem !important;
             bottom: 20px !important;
           }
         }
       `}</style>
-
     </div>
   );
 };
@@ -213,7 +199,7 @@ const styles = {
 
   djImage: {
     height: '85%', width: 'auto', position: 'absolute', bottom: 0, zIndex: 10,
-    filter: 'grayscale(100%) contrast(1.1)', // Static filter is okay, animating it is bad
+    filter: 'grayscale(100%) contrast(1.1)',
     pointerEvents: 'none', transformStyle: 'preserve-3d', transform: 'translateZ(50px)'
   },
 
@@ -226,10 +212,10 @@ const styles = {
     display: 'flex', justifyContent: 'center', alignItems: 'center',
     transformStyle: 'preserve-3d', transform: 'translateZ(-100px)',
   },
-  ringOuter: { position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.1)' },
-  ringDashed: { position: 'absolute', width: '85%', height: '85%', borderRadius: '50%', border: '1px dashed rgba(230, 0, 0, 0.3)' },
-  ringMiddle: { position: 'absolute', width: '60%', height: '60%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.05)' },
-  ringInner: { position: 'absolute', width: '30%', height: '30%', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.2)', backgroundColor: 'rgba(230, 0, 0, 0.05)' },
+  ringOuter: { position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.1)' },
+  ringDashed: { position: 'absolute', width: '85%', height: '85%', borderRadius: '50%', border: '1px dashed rgba(230, 0, 0, 0.4)' },
+  ringMiddle: { position: 'absolute', width: '60%', height: '60%', borderRadius: '50%', border: '2px solid rgba(0, 153, 51, 0.5)' },
+  ringInner: { position: 'absolute', width: '30%', height: '30%', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.2)', backgroundColor: 'rgba(230, 0, 0, 0.03)' },
 
   // --- TEXT RING ---
   ringContainer: { position: 'absolute', transformStyle: 'preserve-3d', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' },
