@@ -3,7 +3,6 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-// --- SEO IMPORT ---
 import { Helmet } from 'react-helmet-async';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -23,7 +22,6 @@ const Navbar = () => {
   const phase = useRef(0); 
   const mouseX = useRef(0); 
 
-  // Memoized Nav Items
   const navItems = useMemo(() => [
     { label: 'HOME', id: 'home', path: '/' },      
     { label: 'MIXES', id: 'mixes', path: '/mixes' }, 
@@ -31,8 +29,6 @@ const Navbar = () => {
     { label: 'CONTACTS', id: 'contacts', path: '/contacts' },      
   ], []);
 
-  // --- SEO: JSON-LD SCHEMA ---
-  // This tells Google exactly how your site structure works
   const navigationSchema = {
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
@@ -42,23 +38,29 @@ const Navbar = () => {
 
   // --- 1. SMART HIDE ANIMATION ---
   useGSAP(() => {
+    // Detect Touch/Mobile
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
     const anim = gsap.from(containerRef.current, { 
       yPercent: -100, paused: true, duration: 0.4, ease: "power3.out"
     }).progress(1);
 
-    let hideTimer = gsap.delayedCall(1.5, () => {
+    // FIX: Only auto-hide on Desktop
+    let hideTimer = !isTouch ? gsap.delayedCall(1.5, () => {
         if (window.scrollY > 50) anim.reverse();
-    });
+    }) : null;
 
     const showNavbar = () => {
         anim.play();
-        hideTimer.restart(true);
-        hideTimer.pause(); 
+        if (hideTimer) { hideTimer.restart(true); hideTimer.pause(); }
     };
 
     const hideNavbar = () => {
-        if (window.scrollY <= 50) { hideTimer.pause(); return; }
-        hideTimer.restart(true);
+        if (window.scrollY <= 50) { 
+            if (hideTimer) hideTimer.pause(); 
+            return; 
+        }
+        if (hideTimer) hideTimer.restart(true);
     };
 
     ScrollTrigger.create({
@@ -66,28 +68,37 @@ const Navbar = () => {
       onUpdate: (self) => {
         if (self.direction === -1) {
             anim.play(); 
-            if (window.scrollY <= 50) hideTimer.pause();
-            else hideTimer.restart(true); 
-        } else { anim.reverse(); }
+            if (window.scrollY <= 50 && hideTimer) hideTimer.pause();
+            else if (hideTimer) hideTimer.restart(true); 
+        } else { 
+            if (window.scrollY > 50) anim.reverse(); 
+        }
       }
     });
 
     const navEl = containerRef.current;
-    navEl.addEventListener("mouseenter", showNavbar);
-    navEl.addEventListener("mouseleave", hideNavbar);
-
-    const handleMouseMove = (e) => { if (e.clientY < 10) showNavbar(); };
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-        navEl.removeEventListener("mouseenter", showNavbar);
-        navEl.removeEventListener("mouseleave", hideNavbar);
-        window.removeEventListener("mousemove", handleMouseMove);
-        hideTimer.kill();
-    };
+    
+    // Desktop Events Only
+    if (!isTouch) {
+        navEl.addEventListener("mouseenter", showNavbar);
+        navEl.addEventListener("mouseleave", hideNavbar);
+        const handleMouseMove = (e) => { if (e.clientY < 10) showNavbar(); };
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => {
+            navEl.removeEventListener("mouseenter", showNavbar);
+            navEl.removeEventListener("mouseleave", hideNavbar);
+            window.removeEventListener("mousemove", handleMouseMove);
+            if (hideTimer) hideTimer.kill();
+        };
+    } else {
+        // Mobile tap safety
+        const handleTouch = (e) => { if (e.touches[0].clientY < 50) anim.play(); };
+        window.addEventListener("touchstart", handleTouch);
+        return () => window.removeEventListener("touchstart", handleTouch);
+    }
   }, { scope: containerRef });
 
-  // --- 2. CANVAS ENGINE ---
+  // --- 2. CANVAS ENGINE (MODIFIED) ---
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -101,6 +112,14 @@ const Navbar = () => {
     resize();
 
     const render = () => {
+      // --- CHANGE: STOP ANIMATION ON MOBILE ---
+      if (window.innerWidth < 768) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Keep the loop alive gently, but draw nothing
+          animationFrameId = requestAnimationFrame(render);
+          return;
+      }
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       amplitude.current += (targetAmplitude.current - amplitude.current) * 0.1;
       
@@ -140,18 +159,14 @@ const Navbar = () => {
     };
   }, []);
 
-  // --- 3. HOVER & ACTIVE STATE LOGIC ---
+  // --- 3. ACTIVE STATE ---
   const { contextSafe } = useGSAP({ scope: containerRef });
-
   const isActive = (path) => location.pathname === path;
 
-  // 3a. Force Active Color on Route Change
   useEffect(() => {
     navItems.forEach((item, index) => {
         const el = linksRef.current[index];
         if(!el) return;
-
-        // Use overwrite: 'auto' to cleanly take over control
         if (isActive(item.path)) {
             gsap.to(el, { color: '#E60000', scale: 1, letterSpacing: '2px', duration: 0.3, overwrite: 'auto' });
         } else {
@@ -160,37 +175,17 @@ const Navbar = () => {
     });
   }, [location.pathname, navItems]);
 
-  // 3b. Hover Enter
   const onLinkEnter = contextSafe((e) => {
     targetAmplitude.current = 50; 
     frequency.current = 0.05; 
-    
-    // FIX: Use e.currentTarget to ensure we target the Link, not the span
-    gsap.to(e.currentTarget, { 
-        color: '#E60000', 
-        scale: 1.1, 
-        letterSpacing: '5px', 
-        duration: 0.3, 
-        ease: 'power2.out',
-        overwrite: 'auto' // Important: stops conflicting animations
-    });
+    gsap.to(e.currentTarget, { color: '#E60000', scale: 1.1, letterSpacing: '5px', duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
   });
 
-  // 3c. Hover Leave
   const onLinkLeave = contextSafe((e, path) => {
     targetAmplitude.current = 0; 
     frequency.current = 0.02; 
-
     const isCurrentPage = isActive(path);
-
-    // FIX: Use e.currentTarget
-    gsap.to(e.currentTarget, { 
-        color: isCurrentPage ? '#E60000' : '#111', 
-        scale: 1, 
-        letterSpacing: '2px', 
-        duration: 0.3,
-        overwrite: 'auto'
-    });
+    gsap.to(e.currentTarget, { color: isCurrentPage ? '#E60000' : '#111', scale: 1, letterSpacing: '2px', duration: 0.3, overwrite: 'auto' });
   });
 
   const handleNavigation = (e, id, path) => {
@@ -202,12 +197,8 @@ const Navbar = () => {
 
   return (
     <nav ref={containerRef} style={styles.navWrapper} itemScope itemType="https://schema.org/SiteNavigationElement">
-      
-      {/* INJECT SCHEMA */}
       <Helmet>
-        <script type="application/ld+json">
-            {JSON.stringify(navigationSchema)}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(navigationSchema)}</script>
       </Helmet>
 
       <div style={styles.bgGradient}></div>
@@ -236,52 +227,51 @@ const Navbar = () => {
 
       <style>{`
         @media (max-width: 768px) {
+          /* --- CHANGE: REMOVE CANVAS ON MOBILE --- */
+          canvas {
+            display: none !important;
+          }
+
           .links-container {
-            gap: 20px !important; 
+            gap: 12px !important; 
             width: 100% !important;
             justify-content: center !important;
+            flex-wrap: wrap !important;
+            padding: 0 10px;
           }
           .nav-link {
-            font-size: 0.9rem !important;
+            font-size: 0.8rem !important;
             letter-spacing: 1px !important;
-            padding: 10px 5px !important;
+            padding: 8px 5px !important;
+            color: #111 !important; 
+            opacity: 1 !important;
           }
           .nav-meta {
             display: none !important;
           }
         }
       `}</style>
-
     </nav>
   );
 };
 
 const styles = {
   navWrapper: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100px', 
-    zIndex: 1000,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none', 
-    transition: 'transform 0.1s ease-out'
+    position: 'fixed', top: 0, left: 0, width: '100%', height: '100px', 
+    zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center',
+    pointerEvents: 'none', transition: 'transform 0.1s ease-out'
   },
   bgGradient: {
     position: 'absolute', inset: 0,
     background: 'linear-gradient(to bottom, rgba(241, 233, 219, 0.95) 0%, rgba(241, 233, 219, 0) 100%)',
-    zIndex: 0,
-    pointerEvents: 'none'
+    zIndex: 0, pointerEvents: 'none'
   },
   canvas: {
     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
     pointerEvents: 'none', zIndex: 1
   },
   linksContainer: {
-    display: 'flex', gap: '8vw', zIndex: 2, pointerEvents: 'auto', alignItems: 'center'
+    display: 'flex', gap: '8vw', zIndex: 10, pointerEvents: 'auto', alignItems: 'center', position: 'relative'
   },
   link: {
     background: 'transparent', border: 'none',

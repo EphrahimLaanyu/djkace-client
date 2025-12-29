@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Footer from './Footer';
 import SEO from '../components/SEO';
+import Navbar from '../components/Navbar'; 
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -78,30 +79,31 @@ const YouTube = () => {
 
     return (
         <div style={styles.mainContainer}>
+            <Navbar />
+            
             <SEO 
                 title="Visual Archive" 
                 description="Watch DJ Kace live sets and video mixes." 
                 url="https://deejaykace.co.ke/youtube"
             />
 
-            <div ref={containerRef} style={styles.pageWrapper}>
+            <div ref={containerRef} style={styles.pageWrapper} className="pageWrapper">
                 
                 {/* HEADER */}
                 <div style={styles.headerBlock}>
                     <button onClick={() => navigate('/')} style={styles.backBtn}>
                         ← RETURN TO HOME
                     </button>
-                    <div style={styles.brandTitle}>VISUAL ARCHIVE</div>
+                    <div style={styles.brandTitle} className="brandTitle">VISUAL ARCHIVE</div>
                     <div style={styles.brandSub}>VIDEO MIX DATABASE // REC</div>
                 </div>
 
                 <TechDivider />
 
                 {/* THE GRID */}
-                <div style={styles.gridContainer}>
+                <div style={styles.gridContainer} className="gridContainer">
                     {videos.map((video, index) => {
                         const videoId = getYouTubeId(video.link);
-                        // Use maxresdefault for highest quality, fallback to hqdefault
                         const thumbnailUrl = videoId 
                             ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
                             : 'https://via.placeholder.com/640x360.png?text=NO+IMAGE';
@@ -132,7 +134,7 @@ const YouTube = () => {
                                         <span style={styles.idBadge}>REF: {index + 1 < 10 ? `0${index + 1}` : index + 1}</span>
                                         <span style={styles.formatBadge}>HD VIDEO</span>
                                     </div>
-                                    <div style={styles.videoTitle}>{video.title}</div>
+                                    <div style={styles.videoTitle} className="videoTitle">{video.title}</div>
                                     <div style={styles.actionLine}>
                                         <span style={styles.watchLink}>Tap to Watch on YouTube ↗</span>
                                     </div>
@@ -159,6 +161,9 @@ const YouTube = () => {
             <Footer />
 
             <style>{`
+                /* GLOBAL BOX SIZING FIX */
+                * { box-sizing: border-box; }
+
                 /* Hover Effects */
                 .video-card-hover { transition: all 0.3s ease; }
                 .video-card-hover:hover { transform: translateY(-5px); }
@@ -167,8 +172,22 @@ const YouTube = () => {
                 
                 /* Mobile Fixes */
                 @media (max-width: 768px) {
-                    .brandTitle { font-size: 2rem !important; }
-                    .gridContainer { grid-template-columns: 1fr !important; gap: 40px !important; }
+                    .pageWrapper {
+                        padding-top: 120px !important;
+                        padding-left: 15px !important;
+                        padding-right: 15px !important;
+                        width: 100% !important; /* Forces fit */
+                    }
+                    .brandTitle { 
+                        font-size: 2rem !important; 
+                        letter-spacing: -1px !important;
+                    }
+                    .gridContainer { 
+                        grid-template-columns: 1fr !important; 
+                        gap: 35px !important; 
+                        width: 100% !important;
+                    }
+                    .videoTitle { font-size: 1rem !important; }
                 }
             `}</style>
         </div>
@@ -178,15 +197,23 @@ const YouTube = () => {
 // --- STYLES ---
 const styles = {
     mainContainer: {
-        width: '100%', minHeight: '100vh',
+        width: '100%', 
+        minHeight: '100vh',
         backgroundColor: '#F1E9DB',
-        display: 'flex', flexDirection: 'column',
+        display: 'flex', 
+        flexDirection: 'column',
+        overflowX: 'hidden' // CRITICAL: Hides any accidental spillover
     },
     pageWrapper: { 
-        minHeight: '100vh', width: '100vw',
-        color: '#111', fontFamily: '"Space Mono", monospace',
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '100px 20px 40px', overflowX: 'hidden' 
+        minHeight: '100vh', 
+        width: '100%', // CRITICAL FIX: Changed from 100vw to 100%
+        boxSizing: 'border-box', // CRITICAL FIX: Ensures padding doesn't add to width
+        color: '#111', 
+        fontFamily: '"Space Mono", monospace',
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        padding: '100px 20px 40px'
     },
     loader: { height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#E60000', fontFamily: 'monospace', letterSpacing: '2px' },
     
@@ -203,17 +230,18 @@ const styles = {
     // GRID LAYOUT
     gridContainer: { 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', // Responsive Grid
+        gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', 
         gap: '30px',
         width: '100%', 
         maxWidth: '1000px',
-        margin: '0 auto'
+        margin: '0 auto',
+        boxSizing: 'border-box'
     },
 
     // VIDEO CARD
     videoCard: { 
         display: 'flex', flexDirection: 'column', gap: '15px',
-        cursor: 'pointer', opacity: 0, transform: 'translateY(20px)' // Initial GSAP state
+        cursor: 'pointer', opacity: 0, transform: 'translateY(20px)'
     },
     
     // IMAGE AREA
@@ -225,10 +253,9 @@ const styles = {
     },
     thumbnail: { 
         width: '100%', height: '100%', objectFit: 'cover', 
-        filter: 'grayscale(100%)', // Stylish B&W default
+        filter: 'grayscale(100%)', 
         transition: 'filter 0.4s ease'
     },
-    // Stylish Corner Markers
     cornerMarkerTop: { position: 'absolute', top: '10px', left: '10px', width: '20px', height: '20px', borderTop: '2px solid #E60000', borderLeft: '2px solid #E60000', zIndex: 2 },
     cornerMarkerBottom: { position: 'absolute', bottom: '10px', right: '10px', width: '20px', height: '20px', borderBottom: '2px solid #E60000', borderRight: '2px solid #E60000', zIndex: 2 },
 
@@ -240,7 +267,7 @@ const styles = {
     
     videoTitle: { 
         fontSize: '1.1rem', fontWeight: '900', textTransform: 'uppercase', 
-        lineHeight: '1.2', marginTop: '5px', className: 'videoTitle' 
+        lineHeight: '1.2', marginTop: '5px'
     },
     
     actionLine: { marginTop: '5px' },
