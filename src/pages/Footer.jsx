@@ -162,7 +162,7 @@ const Footer = () => {
             {/* 3. GROOVE TEXT 2 (Inner Ring - Developer) */}
             <text fill="#E60000" fontSize="12" fontFamily="monospace" letterSpacing="5" fontWeight="bold">
                 <textPath href="#circlePath2" startOffset="50%">
-                    DEVELOPED BY AGENCY NAME • HIGH FIDELITY CODE • 
+                    DEVELOPED BY J&E MAISON • HIGH FIDELITY CODE • 
                 </textPath>
             </text>
 

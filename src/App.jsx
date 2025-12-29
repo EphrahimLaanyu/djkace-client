@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import { AudioProvider } from './context/AudioContext';
 import Contact from './pages/Contacts';
 import ScrollToTop from './context/ScrollToTop';
+import YouTube from './pages/Youtube';
 function App() {
   return (
     <AudioProvider>
@@ -23,6 +24,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/mixes" element={<Mixes />} />
             <Route path="/contacts" element={<Contact />} />
+            <Route path="/youtube" element={<YouTube />} />
           </Routes>
         </main>
 

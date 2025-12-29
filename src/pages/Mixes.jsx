@@ -4,8 +4,9 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudio } from '../context/AudioContext'; 
-// IMPORT FOOTER
+// IMPORT FOOTER & NAVBAR
 import Footer from './Footer';
+import Navbar from '../components/Navbar';
 // IMPORT SEO
 import SEO from '../components/SEO';
 
@@ -156,7 +157,6 @@ const Mixes = () => {
                     index: i + 1,
                     title: t.title,
                     artist: t.description || "Deejay Kace", 
-                    bpm: Math.floor(Math.random() * (128 - 90) + 90),
                     audio: t.audio_url,
                     cover: t.image_url
                 }));
@@ -178,7 +178,7 @@ const Mixes = () => {
         fetchTracks();
     }, []);
 
-    // --- SCROLL ANIMATION ---
+    // --- SCROLL ANIMATION (GLASSMORPHISM) ---
     useGSAP(() => {
         if (loading || tracks.length === 0) return;
         itemsRef.current = itemsRef.current.slice(0, tracks.length);
@@ -198,7 +198,7 @@ const Mixes = () => {
         });
     }, { scope: containerRef, dependencies: [loading, tracks] });
 
-    // 4. MEDIA SESSION API (Lock Screen)
+    // MEDIA SESSION API (Lock Screen)
     useEffect(() => {
         if (!playingId || tracks.length === 0) return;
 
@@ -210,11 +210,6 @@ const Mixes = () => {
                 artist: currentTrack.artist.length > 50 ? currentTrack.artist.substring(0, 50) + "..." : currentTrack.artist,
                 album: "DJ Kace Archive",
                 artwork: [
-                    { src: currentTrack.cover, sizes: '96x96' },
-                    { src: currentTrack.cover, sizes: '128x128' },
-                    { src: currentTrack.cover, sizes: '192x192' },
-                    { src: currentTrack.cover, sizes: '256x256' },
-                    { src: currentTrack.cover, sizes: '384x384' },
                     { src: currentTrack.cover, sizes: '512x512' },
                 ]
             });
@@ -223,12 +218,16 @@ const Mixes = () => {
 
     const animateRow = (element, isActive) => {
         gsap.to(element, {
-            scale: isActive ? 1.02 : 0.98,
-            opacity: isActive ? 1 : 0.6,
+            // Glassmorphism logic
+            backgroundColor: isActive ? "rgba(255, 255, 255, 0.45)" : "rgba(255, 255, 255, 0)",
+            backdropFilter: isActive ? "blur(12px)" : "blur(0px)",
+            webkitBackdropFilter: isActive ? "blur(12px)" : "blur(0px)",
+            borderColor: isActive ? "rgba(255, 255, 255, 0.6)" : "transparent",
+            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 0, 0, 0.1)" : "none",
+            scale: isActive ? 1.02 : 1,
+            y: isActive ? -5 : 0,
             color: isActive ? "#E60000" : "#111",
-            borderBottomColor: isActive ? "#E60000" : "#ccc",
-            duration: 0.3,
-            overwrite: 'auto',
+            duration: 0.5,
             ease: "power2.out"
         });
 
@@ -250,6 +249,9 @@ const Mixes = () => {
 
     return (
         <div style={styles.mainContainer}>
+            {/* --- ADDED NAVBAR HERE --- */}
+            <Navbar />
+
             {/* SEO TAGS */}
             <SEO 
                 title="Mixes" 
@@ -269,7 +271,7 @@ const Mixes = () => {
                     <div style={styles.colHeaders}>
                         <span>ID</span>
                         <span>TITLE // ARTIST</span>
-                        <span>BPM</span>
+                        <span>LENGTH</span>
                     </div>
                     <div style={styles.divider}>--------------------------------</div>
                 </div>
@@ -279,7 +281,7 @@ const Mixes = () => {
                         <div 
                             key={track.id} 
                             ref={addToRefs}
-                            className="track-row"
+                            className="track-row glass-row"
                             style={styles.row}
                             onClick={() => toggleTrack(track)}
                         >
@@ -301,7 +303,10 @@ const Mixes = () => {
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div style={styles.artist}>{track.artist}</div>
                                 </div>
-                                <span style={styles.bpm}>{track.bpm}</span>
+                                
+                                <span style={styles.durationDisplay}>
+                                    {formatTime(trackDurations[track.id])}
+                                </span>
                             </div>
 
                             <ReceiptPlayer 
@@ -338,6 +343,13 @@ const Mixes = () => {
             <style>{`
                 .active-row .track-title { font-weight: 900 !important; letter-spacing: 1px; }
                 * { box-sizing: border-box; }
+                
+                /* Glassmorphism CSS Transition */
+                .glass-row {
+                    border: 1px solid transparent; 
+                    transition: backdrop-filter 0.5s ease;
+                }
+
                 @media (max-width: 600px) {
                     .brand-title { font-size: 1.5rem !important; }
                     .track-title { font-size: 1rem !important; }
@@ -376,16 +388,38 @@ const styles = {
     brandTitle: { fontSize: '2.5rem', fontWeight: '900', marginBottom: '5px', lineHeight: 1 },
     brandSub: { fontSize: '0.9rem', opacity: 0.6, letterSpacing: '2px' },
     divider: { width: '100%', overflow: 'hidden', whiteSpace: 'nowrap', opacity: 0.3, margin: '15px 0' },
-    colHeaders: { display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 5px', width: '100%' },
-    rollContainer: { width: '100%', maxWidth: '600px', paddingBottom: '80px' },
+    colHeaders: { display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 20px', width: '100%' },
     
-    // ROW STYLES
-    row: { 
-        display: 'flex', flexDirection: 'column', padding: '20px 5px', 
-        borderBottom: '1px dashed #ccc', cursor: 'pointer', 
-        transformOrigin: 'center center', overflow: 'hidden', width: '100%',
-        willChange: 'transform, opacity' 
+    // UPDATED CONTAINER with GAP
+    rollContainer: { 
+        width: '100%', 
+        maxWidth: '600px', 
+        paddingBottom: '80px',
+        display: 'flex', 
+        flexDirection: 'column',
+        gap: '20px' // Critical for glass boxes
     },
+    
+    // UPDATED ROW STYLE FOR GLASSMORPHISM
+    row: { 
+        display: 'flex', 
+        flexDirection: 'column', 
+        padding: '25px', 
+        
+        // Invisible base state
+        backgroundColor: 'rgba(255,255,255,0)',
+        backdropFilter: 'blur(0px)',
+        border: '1px solid transparent',
+        boxShadow: 'none',
+        borderRadius: '16px',
+
+        cursor: 'pointer', 
+        transformOrigin: 'center center', 
+        overflow: 'hidden', 
+        width: '100%',
+        willChange: 'transform, backdrop-filter, background-color' 
+    },
+    
     rowData: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' },
     
     // IMAGE STYLES
@@ -393,8 +427,8 @@ const styles = {
     coverImage: {
         width: '55px', height: '55px', objectFit: 'cover',
         border: '1px solid #111',
-        filter: 'grayscale(100%)', // Default B&W
-        borderRadius: '2px',
+        filter: 'grayscale(100%)', 
+        borderRadius: '4px', // Rounded for glass style
         transition: 'filter 0.3s'
     },
     qty: { opacity: 0.5, fontSize: '0.9rem', fontWeight: 'bold' },
@@ -402,21 +436,20 @@ const styles = {
     meta: { flexGrow: 1, paddingLeft: '15px', paddingRight: '15px', overflow: 'hidden' },
     title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.1' },
     
-    // UPDATED ARTIST STYLE
     artist: { 
         fontSize: '0.85rem', 
         opacity: 0.75,
-        whiteSpace: 'normal',       // Allow wrapping
+        whiteSpace: 'normal',       
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         display: '-webkit-box',
-        WebkitLineClamp: '3',       // Show up to 3 lines nicely
+        WebkitLineClamp: '3',       
         WebkitBoxOrient: 'vertical',
         lineHeight: '1.4',
         marginTop: '5px'
     },
     
-    bpm: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
+    durationDisplay: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
     
     // PLAYER WRAPPER
     playerWrapper: { 
@@ -432,8 +465,8 @@ const styles = {
     waveBar: { flex: 1, borderRadius: '2px', transition: 'height 0.1s ease', minWidth: '2px' },
     
     controlsRow: { display: 'flex', alignItems: 'center', gap: '10px', width: '100%' },
-    playBtn: { background: '#111', color: '#fff', border: 'none', padding: '8px 12px', fontFamily: 'inherit', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0 },
-    downloadBtn: { background: 'transparent', border: '1px solid #111', color: '#111', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s', ':hover': { background: '#111', color: '#fff' } },
+    playBtn: { background: '#111', color: '#fff', border: 'none', padding: '8px 12px', fontFamily: 'inherit', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, borderRadius: '4px' },
+    downloadBtn: { background: 'transparent', border: '1px solid #111', color: '#111', padding: '6px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s', borderRadius: '4px' },
     scrubberContainer: { flexGrow: 1, display: 'flex', alignItems: 'center' },
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
