@@ -74,6 +74,7 @@ const DJsPicks = () => {
                     index: i + 1,
                     title: t.title,
                     artist: t.description?.substring(0, 100) || "Deejay Kace",
+                    genre: t.genre, // ADDED GENRE
                     audio: t.audio_url,
                     cover: t.image_url 
                 }));
@@ -235,6 +236,8 @@ const DJsPicks = () => {
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div className="track-artist" style={styles.artist}>{track.artist}</div>
+                                    {/* ADDED GENRE DISPLAY */}
+                                    <div style={styles.genre}>{track.genre}</div>
                                 </div>
                                 
                                 <span style={styles.durationDisplay}>
@@ -337,6 +340,16 @@ const styles = {
     meta: { flexGrow: 1, paddingLeft: '15px', paddingRight: '10px', minWidth: 0 },
     title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', lineHeight: '1.2' },
     artist: { fontSize: '0.8rem', opacity: 0.7 },
+    
+    // ADDED GENRE STYLE
+    genre: {
+        fontSize: '0.6rem',
+        fontWeight: 'bold',
+        marginTop: '3px',
+        textTransform: 'uppercase',
+        color: '#E60000',
+        letterSpacing: '1px'
+    },
     
     durationDisplay: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
     

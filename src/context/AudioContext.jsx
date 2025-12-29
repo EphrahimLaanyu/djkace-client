@@ -50,9 +50,16 @@ export const AudioProvider = ({ children }) => {
             return;
         }
 
+        // --- NEW TRACK LOGIC ---
         audio.pause();
         audio.src = track.audio;
         audio.load();
+        
+        // --- ADDED: TRACK PLAY COUNT ---
+        fetch(`https://djkace-api.elaanyu.workers.dev/tracks/${track.id}/play`, { 
+            method: 'POST' 
+        }).catch(err => console.error("Analytics Error:", err));
+        // -------------------------------
         
         audio.play()
             .then(() => setIsPlaying(true))

@@ -21,7 +21,7 @@ const formatTime = (seconds) => {
 };
 
 // --- COMPONENT: INLINE PLAYER ---
-const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onToggle, onSeek, audioUrl, title }) => {
+const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, onToggle, onSeek, audioUrl, title }) => {
     const displayDuration = isPlaying ? duration : totalDuration;
 
     return (
@@ -50,6 +50,13 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onTogg
                     title="Download Mix"
                     onClick={async (e) => {
                         e.stopPropagation();
+                        
+                        // --- TRACK DOWNLOAD COUNT ---
+                        fetch(`https://djkace-api.elaanyu.workers.dev/tracks/${id}/download`, { 
+                            method: 'POST' 
+                        }).catch(err => console.error("Analytics Error:", err));
+                        // ----------------------------
+
                         e.preventDefault();
                         try {
                             const response = await fetch(audioUrl);
@@ -156,7 +163,8 @@ const Mixes = () => {
                     id: t.id,
                     index: i + 1,
                     title: t.title,
-                    artist: t.description || "Deejay Kace", 
+                    artist: t.description || "Deejay Kace",
+                    genre: t.genre, // ADDED GENRE HERE
                     audio: t.audio_url,
                     cover: t.image_url
                 }));
@@ -302,6 +310,8 @@ const Mixes = () => {
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div style={styles.artist}>{track.artist}</div>
+                                    {/* ADDED GENRE DISPLAY */}
+                                    <div style={styles.genre}>{track.genre}</div>
                                 </div>
                                 
                                 <span style={styles.durationDisplay}>
@@ -310,6 +320,7 @@ const Mixes = () => {
                             </div>
 
                             <ReceiptPlayer 
+                                id={track.id} 
                                 isPlaying={playingId === track.id && isPlaying}
                                 currentTime={playingId === track.id ? currentTime : 0}
                                 duration={playingId === track.id ? duration : 0}
@@ -447,6 +458,16 @@ const styles = {
         WebkitBoxOrient: 'vertical',
         lineHeight: '1.4',
         marginTop: '5px'
+    },
+
+    // ADDED GENRE STYLE
+    genre: {
+        fontSize: '0.7rem',
+        fontWeight: 'bold',
+        marginTop: '3px',
+        textTransform: 'uppercase',
+        color: '#E60000',
+        letterSpacing: '1px'
     },
     
     durationDisplay: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
