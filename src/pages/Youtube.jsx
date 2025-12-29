@@ -79,7 +79,7 @@ const YouTube = () => {
 
     return (
         <div style={styles.mainContainer}>
-            <Navbar />
+            {/* <Navbar /> */}
             
             <SEO 
                 title="Visual Archive" 
@@ -197,7 +197,7 @@ const YouTube = () => {
 // --- STYLES ---
 const styles = {
     mainContainer: {
-        width: '100%', 
+        width: '100vw', 
         minHeight: '100vh',
         backgroundColor: '#F1E9DB',
         display: 'flex', 

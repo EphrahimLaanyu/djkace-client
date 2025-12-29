@@ -250,7 +250,7 @@ const Mixes = () => {
     return (
         <div style={styles.mainContainer}>
             {/* --- ADDED NAVBAR HERE --- */}
-            <Navbar />
+            {/* <Navbar /> */}
 
             {/* SEO TAGS */}
             <SEO 
