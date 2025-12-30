@@ -244,15 +244,15 @@ const styles = {
 
   copyright: { fontSize: '0.6rem', color: '#888', maxWidth: '300px' },
 
-  // --- NEW LOGO STYLE ---
+  // --- UPDATED LOGO STYLE ---
   footerLogo: {
-    width: '120px',
+    width: '180px', // Increased size
     height: 'auto',
     marginTop: '30px',
-    filter: 'grayscale(100%) contrast(1.2) brightness(0.9)', // Monochrome stamp effect
-    transform: 'rotate(-5deg)', // Slight tilt like a stamp
+    filter: 'grayscale(100%) contrast(1.2) brightness(0.9)', 
+    // transform: 'rotate(-5deg)', // Removed rotation
     opacity: 0.8,
-    mixBlendMode: 'multiply' // Blends into the "paper" background
+    mixBlendMode: 'multiply' 
   },
 
   // --- RIGHT SIDE: THE RECORD ---
