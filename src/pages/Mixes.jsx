@@ -4,11 +4,11 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudio } from '../context/AudioContext'; 
-// IMPORT FOOTER & NAVBAR
-import Footer from './Footer';
 import Navbar from '../components/Navbar';
-// IMPORT SEO
 import SEO from '../components/SEO';
+
+// --- IMPORT IMAGE FOR FOOTER ---
+import footerLogo from '../assets/Artboard_3_page-0001-removebg-preview.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -50,13 +50,9 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, on
                     title="Download Mix"
                     onClick={async (e) => {
                         e.stopPropagation();
-                        
-                        // --- TRACK DOWNLOAD COUNT ---
                         fetch(`https://djkace-api.elaanyu.workers.dev/tracks/${id}/download`, { 
                             method: 'POST' 
                         }).catch(err => console.error("Analytics Error:", err));
-                        // ----------------------------
-
                         e.preventDefault();
                         try {
                             const response = await fetch(audioUrl);
@@ -64,10 +60,8 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, on
                             const url = window.URL.createObjectURL(blob);
                             const link = document.createElement('a');
                             link.href = url;
-                            
                             const safeTitle = title ? title.replace(/[^a-z0-9 ]/gi, '') : `Mix_${Date.now()}`;
                             link.download = `DJ Kace - ${safeTitle}.mp3`;
-                            
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
@@ -132,6 +126,194 @@ const MarqueeBand = () => {
                 </span>
             </div>
         </div>
+    );
+};
+
+// --- COMPONENT: LOCAL FOOTER ---
+const Footer = () => {
+    const containerRef = useRef(null);
+    const recordRef = useRef(null);
+  
+    useGSAP(() => {
+      // 1. THE SPINNING ANIMATION
+      const spin = gsap.to(recordRef.current, {
+        rotation: 360,
+        duration: 10,
+        repeat: -1,
+        ease: "none",
+        transformOrigin: "center center"
+      });
+  
+      // 2. INTERACTION: Speed up on hover (Scratch effect)
+      const recordEl = recordRef.current;
+      
+      if(recordEl) {
+        recordEl.addEventListener('mouseenter', () => {
+            gsap.to(spin, { timeScale: 0.2, duration: 0.5 }); // Slow down (brake)
+        });
+        
+        recordEl.addEventListener('mouseleave', () => {
+            gsap.to(spin, { timeScale: 1, duration: 1 }); // Back to normal speed
+        });
+        
+        recordEl.addEventListener('mousedown', () => {
+             gsap.to(spin, { timeScale: 5, duration: 0.2 }); // Fast spin (rewind/cue)
+        });
+        
+        recordEl.addEventListener('mouseup', () => {
+             gsap.to(spin, { timeScale: 1, duration: 0.5 });
+        });
+      }
+  
+    }, { scope: containerRef });
+  
+    return (
+      <footer ref={containerRef} style={footerStyles.footerWrapper} itemScope itemType="https://schema.org/WPFooter">
+        
+        {/* LEFT SIDE: THE LINER NOTES (Content) */}
+        <div style={footerStyles.linerNotes}>
+            
+            <div style={footerStyles.tracklistBlock}>
+               <h4 style={footerStyles.sideLabel}>SOCIALS // CONTACT</h4>
+               <ul style={footerStyles.trackList}>
+                   {/* INSTAGRAM */}
+                   <li style={footerStyles.trackItem}>
+                       <span style={footerStyles.trackNum}>A1.</span>
+                       <a 
+                           href="https://www.instagram.com/deejaykace/" 
+                           target="_blank" 
+                           rel="noopener noreferrer me" 
+                           style={footerStyles.trackLink}
+                           itemProp="sameAs" 
+                       >
+                           INSTAGRAM (@deejaykace)
+                       </a>
+                       <span style={footerStyles.trackTime}>↗</span>
+                   </li>
+  
+                   {/* TIKTOK */}
+                   <li style={footerStyles.trackItem}>
+                       <span style={footerStyles.trackNum}>A2.</span>
+                       <a 
+                           href="https://www.tiktok.com/@dj.kace" 
+                           target="_blank" 
+                           rel="noopener noreferrer me" 
+                           style={footerStyles.trackLink}
+                           itemProp="sameAs"
+                       >
+                           TIKTOK (@dj.kace)
+                       </a>
+                       <span style={footerStyles.trackTime}>↗</span>
+                   </li>
+  
+                   {/* YOUTUBE */}
+                   <li style={footerStyles.trackItem}>
+                       <span style={footerStyles.trackNum}>A3.</span>
+                       <a 
+                           href="https://www.youtube.com/@DeeJayKace" 
+                           target="_blank" 
+                           rel="noopener noreferrer me" 
+                           style={footerStyles.trackLink}
+                           itemProp="sameAs"
+                       >
+                           YOUTUBE (@DeeJayKace)
+                       </a>
+                       <span style={footerStyles.trackTime}>↗</span>
+                   </li>
+  
+                   {/* EMAIL */}
+                   <li style={footerStyles.trackItem}>
+                       <span style={footerStyles.trackNum}>B1.</span>
+                       <a 
+                           href="mailto:deejaykace@gmail.com" 
+                           style={footerStyles.trackLink}
+                           itemProp="email"
+                       >
+                           EMAIL (deejaykace@gmail.com)
+                       </a>
+                       <span style={footerStyles.trackTime}>✉</span>
+                   </li>
+               </ul>
+            </div>
+  
+            <div style={footerStyles.creditsBlock}>
+               <h4 style={footerStyles.sideLabel}>CREDITS</h4>
+               <div style={footerStyles.creditGrid}>
+                   <div style={footerStyles.creditItem}>
+                       <span style={footerStyles.role}>EXECUTIVE PRODUCER</span>
+                       <span style={footerStyles.name} itemProp="producer">DEEJAY KACE</span>
+                   </div>
+                   <div style={footerStyles.creditItem}>
+                       <span style={footerStyles.role}>DEVELOPMENT & CODE</span>
+                       <div style={footerStyles.devBadge}>
+                            <span style={footerStyles.devName}>J & M</span>
+                            <a href="mailto:barcodetech@gmail.com" style={footerStyles.devLink}>barcodetech@gmail.com</a>
+                       </div>
+                   </div>
+                   <div style={footerStyles.creditItem}>
+                       <span style={footerStyles.role}>RECORDED AT</span>
+                       <span style={footerStyles.name}>NAIROBI, KE</span>
+                   </div>
+               </div>
+            </div>
+            
+            <div style={footerStyles.copyright}>
+               © 2025 DEEJAY KACE. UNAUTHORIZED DUPLICATION IS A VIOLATION OF APPLICABLE LAWS.
+            </div>
+  
+            {/* --- ADDED LOGO HERE --- */}
+            <img src={footerLogo} alt="Kace Logo" style={footerStyles.footerLogo} />
+  
+        </div>
+  
+        {/* RIGHT SIDE: THE RECORD (SVG) */}
+        <div style={footerStyles.recordContainer}>
+          <svg 
+              ref={recordRef}
+              viewBox="0 0 600 600" 
+              style={footerStyles.recordSvg}
+          >
+              <defs>
+                  <path id="circlePath1" d="M 300, 300 m -240, 0 a 240,240 0 1,1 480,0 a 240,240 0 1,1 -480,0" />
+                  <path id="circlePath2" d="M 300, 300 m -190, 0 a 190,190 0 1,1 380,0 a 190,190 0 1,1 -380,0" />
+              </defs>
+  
+              <circle cx="300" cy="300" r="295" fill="#111" />
+              <circle cx="300" cy="300" r="290" fill="none" stroke="#222" strokeWidth="2" />
+              <circle cx="300" cy="300" r="280" fill="none" stroke="#1a1a1a" strokeWidth="4" />
+              <circle cx="300" cy="300" r="270" fill="none" stroke="#222" strokeWidth="1" />
+              
+              <text fill="#444" fontSize="14" fontFamily="monospace" letterSpacing="4" fontWeight="bold">
+                  <textPath href="#circlePath1" startOffset="0%">
+                      ALL RIGHTS RESERVED • DEEJAY KACE • NAIROBI KENYA • EST 2025 • ORIGINAL MASTER RECORDING • 
+                  </textPath>
+              </text>
+  
+              <text fill="#E60000" fontSize="12" fontFamily="monospace" letterSpacing="5" fontWeight="bold">
+                  <textPath href="#circlePath2" startOffset="50%">
+                      DEVELOPED BY J&E MAISON • HIGH FIDELITY CODE • 
+                  </textPath>
+              </text>
+  
+              <circle cx="300" cy="300" r="100" fill="#E60000" />
+              <circle cx="300" cy="300" r="15" fill="#fff" />
+              
+              <text x="300" y="260" textAnchor="middle" fill="#000" fontSize="24" fontWeight="900" fontFamily="sans-serif">KACE</text>
+              <text x="300" y="280" textAnchor="middle" fill="#000" fontSize="10" fontFamily="monospace">STEREO</text>
+              <text x="300" y="340" textAnchor="middle" fill="#000" fontSize="10" fontFamily="monospace">33 1/3 RPM</text>
+              
+              <circle cx="300" cy="300" r="295" fill="url(#reflection)" opacity="0.1" pointerEvents="none"/>
+              <linearGradient id="reflection" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#fff" stopOpacity="0.5" />
+                  <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+              </linearGradient>
+          </svg>
+  
+          <div style={footerStyles.sleeveShadow}></div>
+        </div>
+  
+      </footer>
     );
 };
 
@@ -373,42 +555,55 @@ const Mixes = () => {
     );
 };
 
-// --- STYLES ---
+// --- MIXES STYLES ---
 const styles = {
     mainContainer: {
-        width: '100%',
+        width: '100vw', // REVERTED to 100vw to ensure full viewport width
         minHeight: '100vh',
         backgroundColor: '#F1E9DB',
         display: 'flex',
         flexDirection: 'column',
+        overflowX: 'hidden' // Strictly hide horizontal scroll
     },
     pageWrapper: { 
         minHeight: '100vh', 
-        width: '100vw', 
+        width: '100%', 
         color: '#111', 
         fontFamily: '"Space Mono", "Courier New", monospace', 
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center', 
         padding: '100px 15px 40px', 
-        overflowX: 'hidden' 
+        overflowX: 'hidden'
     },
     loader: { height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#E60000', fontFamily: 'monospace', letterSpacing: '2px' },
-    receiptHeader: { textAlign: 'center', marginBottom: '40px', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' },
+    
+    // ADDED MARGIN AUTO TO FORCE CENTERING
+    receiptHeader: { 
+        textAlign: 'center', 
+        marginBottom: '40px', 
+        width: '100%', 
+        maxWidth: '600px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        margin: '0 auto 40px auto' // Force center
+    },
     backBtn: { background: 'transparent', border: '1px solid #111', padding: '10px 20px', marginBottom: '30px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.8rem', transition: 'all 0.2s', ':hover': { background: '#111', color: '#fff' } },
     brandTitle: { fontSize: '2.5rem', fontWeight: '900', marginBottom: '5px', lineHeight: 1 },
     brandSub: { fontSize: '0.9rem', opacity: 0.6, letterSpacing: '2px' },
     divider: { width: '100%', overflow: 'hidden', whiteSpace: 'nowrap', opacity: 0.3, margin: '15px 0' },
     colHeaders: { display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', opacity: 0.5, padding: '0 20px', width: '100%' },
     
-    // UPDATED CONTAINER with GAP
+    // ADDED MARGIN AUTO TO FORCE CENTERING
     rollContainer: { 
         width: '100%', 
         maxWidth: '600px', 
         paddingBottom: '80px',
         display: 'flex', 
         flexDirection: 'column',
-        gap: '20px' // Critical for glass boxes
+        gap: '20px',
+        margin: '0 auto' // Force center
     },
     
     // UPDATED ROW STYLE FOR GLASSMORPHISM
@@ -518,6 +713,98 @@ const styles = {
         paddingRight: '50px',
         flexShrink: 0,
         display: 'block'
+    }
+};
+
+// --- FOOTER STYLES ---
+const footerStyles = {
+    footerWrapper: {
+      backgroundColor: '#F1E9DB', 
+      color: '#111',
+      fontFamily: '"Space Mono", monospace',
+      display: 'flex',
+      flexWrap: 'wrap', 
+      overflow: 'hidden',
+      position: 'relative',
+      borderTop: '1px solid #ccc',
+      width: '100%' 
+    },
+  
+    // --- LEFT SIDE: LINER NOTES ---
+    linerNotes: {
+      flex: '1 1 300px', // Prevents overflow on mobile
+      maxWidth: '100%', 
+      padding: '60px 40px',
+      display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      zIndex: 10,
+      position: 'relative' 
+    },
+    
+    // Tracklist (Socials)
+    tracklistBlock: { marginBottom: '50px' },
+    sideLabel: { 
+      fontSize: '1.5rem', fontWeight: '900', borderBottom: '2px solid #111', 
+      paddingBottom: '10px', marginBottom: '20px', letterSpacing: '-1px' 
+    },
+    trackList: { listStyle: 'none', padding: 0 },
+    trackItem: { 
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+      marginBottom: '10px', borderBottom: '1px dotted #ccc', paddingBottom: '5px' 
+    },
+    trackNum: { fontWeight: 'bold', width: '40px' },
+    trackLink: { 
+      flexGrow: 1, textDecoration: 'none', color: '#111', fontSize: '1rem', fontWeight: 'bold',
+      textTransform: 'uppercase', cursor: 'pointer'
+    },
+    trackTime: { fontSize: '0.8rem', color: '#666', fontWeight: 'bold' },
+  
+    // Credits (Developer)
+    creditsBlock: { marginBottom: '40px' },
+    creditGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' },
+    creditItem: { display: 'flex', flexDirection: 'column' },
+    role: { fontSize: '0.6rem', color: '#666', marginBottom: '5px', textTransform: 'uppercase' },
+    name: { fontWeight: 'bold' },
+  
+    // Dev Badge Specifics
+    devBadge: { display: 'flex', flexDirection: 'column' },
+    devName: { fontWeight: 'bold', color: '#E60000' },
+    devLink: { fontSize: '0.7rem', color: '#111', textDecoration: 'underline' },
+  
+    copyright: { fontSize: '0.6rem', color: '#888', maxWidth: '300px' },
+  
+    // --- UPDATED LOGO STYLE ---
+    footerLogo: {
+      width: '180px', 
+      height: 'auto',
+      marginTop: '30px',
+      filter: 'grayscale(100%) contrast(1.2) brightness(0.9)', 
+      opacity: 0.8,
+      mixBlendMode: 'multiply' 
+    },
+  
+    // --- RIGHT SIDE: THE RECORD ---
+    recordContainer: {
+      flex: '1 1 300px', // Prevents overflow on mobile
+      maxWidth: '100%', 
+      backgroundColor: '#111', 
+      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      minHeight: '400px'
+    },
+    
+    recordSvg: {
+      width: '90%',
+      maxWidth: '500px',
+      height: 'auto',
+      filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.5))',
+      cursor: 'grab' 
+    },
+  
+    sleeveShadow: {
+      position: 'absolute', left: 0, top: 0, bottom: 0, width: '20px',
+      background: 'linear-gradient(to right, rgba(0,0,0,0.5), transparent)',
+      pointerEvents: 'none'
     }
 };
 
