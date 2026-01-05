@@ -31,7 +31,7 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, on
                     <div key={i} style={{
                         ...styles.waveBar,
                         height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px',
-                        // --- CHANGE: GREEN SIGNAL WHEN PLAYING ---
+                        // --- MATCHED TO DJS PICKS: GREEN SIGNAL ---
                         backgroundColor: isPlaying ? '#009933' : '#333' 
                     }} />
                 ))}
@@ -413,11 +413,12 @@ const Mixes = () => {
             backgroundColor: isActive ? "rgba(255, 255, 255, 0.45)" : "rgba(255, 255, 255, 0)",
             backdropFilter: isActive ? "blur(12px)" : "blur(0px)",
             webkitBackdropFilter: isActive ? "blur(12px)" : "blur(0px)",
-            borderColor: isActive ? "rgba(255, 255, 255, 0.6)" : "transparent",
-            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 0, 0, 0.1)" : "none",
+            // --- MATCHED TO DJS PICKS: GREEN BORDER & GLOW ---
+            borderColor: isActive ? "#009933" : "transparent",
+            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 153, 51, 0.15)" : "none",
             scale: isActive ? 1.02 : 1,
             y: isActive ? -5 : 0,
-            color: isActive ? "#E60000" : "#111",
+            color: isActive ? "#111" : "#111", // Keeping text dark for readability (just like DJs Picks)
             duration: 0.5,
             ease: "power2.out"
         });
@@ -493,7 +494,7 @@ const Mixes = () => {
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div style={styles.artist}>{track.artist}</div>
-                                    {/* ADDED GENRE DISPLAY */}
+                                    {/* ADDED GREEN GENRE */}
                                     <div style={styles.genre}>{track.genre}</div>
                                 </div>
                                 
@@ -648,13 +649,13 @@ const styles = {
         marginTop: '5px'
     },
 
-    // ADDED GENRE STYLE
+    // MATCHED TO DJS PICKS: GREEN GENRE
     genre: {
         fontSize: '0.7rem',
         fontWeight: 'bold',
         marginTop: '3px',
         textTransform: 'uppercase',
-        color: '#E60000',
+        color: '#009933', // Green
         letterSpacing: '1px'
     },
     

@@ -27,7 +27,8 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onTogg
                     <div key={i} style={{
                         ...styles.waveBar,
                         height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px', 
-                        backgroundColor: isPlaying ? '#E60000' : '#333'
+                        // --- CHANGE: GREEN SIGNAL ---
+                        backgroundColor: isPlaying ? '#009933' : '#333'
                     }} />
                 ))}
             </div>
@@ -74,7 +75,7 @@ const DJsPicks = () => {
                     index: i + 1,
                     title: t.title,
                     artist: t.description?.substring(0, 100) || "Deejay Kace",
-                    genre: t.genre, // ADDED GENRE
+                    genre: t.genre,
                     audio: t.audio_url,
                     cover: t.image_url 
                 }));
@@ -141,14 +142,14 @@ const DJsPicks = () => {
             backdropFilter: isActive ? "blur(12px)" : "blur(0px)",
             webkitBackdropFilter: isActive ? "blur(12px)" : "blur(0px)",
             
-            // Border & Shadow
-            borderColor: isActive ? "rgba(255, 255, 255, 0.6)" : "transparent",
-            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 0, 0, 0.1)" : "none",
+            // --- CHANGE: GREEN BORDER & GLOW ---
+            borderColor: isActive ? "#009933" : "transparent",
+            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 153, 51, 0.15)" : "none",
             
             // Movement & Color
             scale: isActive ? 1.02 : 1,
             y: isActive ? -5 : 0,
-            color: isActive ? "#E60000" : "#111",
+            color: isActive ? "#111" : "#111", // Keeping text dark for readability
             
             duration: 0.5,
             ease: "power2.out"
@@ -236,7 +237,7 @@ const DJsPicks = () => {
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div className="track-artist" style={styles.artist}>{track.artist}</div>
-                                    {/* ADDED GENRE DISPLAY */}
+                                    {/* ADDED GREEN GENRE */}
                                     <div style={styles.genre}>{track.genre}</div>
                                 </div>
                                 
@@ -337,13 +338,13 @@ const styles = {
     title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', lineHeight: '1.2' },
     artist: { fontSize: '0.8rem', opacity: 0.7 },
     
-    // ADDED GENRE STYLE
+    // --- CHANGE: GREEN GENRE ---
     genre: {
         fontSize: '0.6rem',
         fontWeight: 'bold',
         marginTop: '3px',
         textTransform: 'uppercase',
-        color: '#E60000',
+        color: '#009933', // Green
         letterSpacing: '1px'
     },
     
