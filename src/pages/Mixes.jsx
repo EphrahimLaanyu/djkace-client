@@ -31,7 +31,8 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, on
                     <div key={i} style={{
                         ...styles.waveBar,
                         height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px',
-                        backgroundColor: isPlaying ? '#E60000' : '#333'
+                        // --- CHANGE: GREEN SIGNAL WHEN PLAYING ---
+                        backgroundColor: isPlaying ? '#009933' : '#333' 
                     }} />
                 ))}
             </div>
@@ -346,7 +347,7 @@ const Mixes = () => {
                     index: i + 1,
                     title: t.title,
                     artist: t.description || "Deejay Kace",
-                    genre: t.genre, // ADDED GENRE HERE
+                    genre: t.genre, 
                     audio: t.audio_url,
                     cover: t.image_url
                 }));
@@ -550,12 +551,12 @@ const Mixes = () => {
 // --- MIXES STYLES ---
 const styles = {
     mainContainer: {
-        width: '100vw', // REVERTED to 100vw to ensure full viewport width
+        width: '100vw', 
         minHeight: '100vh',
         backgroundColor: '#F1E9DB',
         display: 'flex',
         flexDirection: 'column',
-        overflowX: 'hidden' // Strictly hide horizontal scroll
+        overflowX: 'hidden' 
     },
     pageWrapper: { 
         minHeight: '100vh', 
@@ -579,7 +580,7 @@ const styles = {
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center',
-        margin: '0 auto 40px auto' // Force center
+        margin: '0 auto 40px auto' 
     },
     backBtn: { background: 'transparent', border: '1px solid #111', padding: '10px 20px', marginBottom: '30px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.8rem', transition: 'all 0.2s', ':hover': { background: '#111', color: '#fff' } },
     brandTitle: { fontSize: '2.5rem', fontWeight: '900', marginBottom: '5px', lineHeight: 1 },
@@ -595,7 +596,7 @@ const styles = {
         display: 'flex', 
         flexDirection: 'column',
         gap: '20px',
-        margin: '0 auto' // Force center
+        margin: '0 auto' 
     },
     
     // UPDATED ROW STYLE FOR GLASSMORPHISM
@@ -724,7 +725,7 @@ const footerStyles = {
   
     // --- LEFT SIDE: LINER NOTES ---
     linerNotes: {
-      flex: '1 1 300px', // Prevents overflow on mobile
+      flex: '1 1 300px', 
       maxWidth: '100%', 
       padding: '60px 40px',
       display: 'flex', flexDirection: 'column', justifyContent: 'center',
@@ -776,7 +777,7 @@ const footerStyles = {
   
     // --- RIGHT SIDE: THE RECORD ---
     recordContainer: {
-      flex: '1 1 300px', // Prevents overflow on mobile
+      flex: '1 1 300px', 
       maxWidth: '100%', 
       backgroundColor: '#111', 
       display: 'flex', justifyContent: 'center', alignItems: 'center',
