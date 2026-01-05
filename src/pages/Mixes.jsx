@@ -462,7 +462,7 @@ const Mixes = () => {
                     <div style={styles.divider}>================================</div>
                     <div style={styles.colHeaders}>
                         <span>ID</span>
-                        <span>TITLE // ARTIST</span>
+                        <span>DESCRIPTION</span>
                         <span>LENGTH</span>
                     </div>
                     <div style={styles.divider}>--------------------------------</div>
