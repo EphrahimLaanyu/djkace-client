@@ -23,7 +23,7 @@ const Home = () => {
     });
 
     // 2. DESKTOP ANIMATION (Interactive Mouse Tilt)
-    mm.add("(min-width: 769px)", () => {
+    mm.add("(min-width: 1025px)", () => { // Changed to 1025px to separate from Tablet
         gsap.set(".dj-hero", { 
             opacity: 0, 
             scale: 0.8, 
@@ -55,8 +55,9 @@ const Home = () => {
           return () => window.removeEventListener("mousemove", handleMouseMove);
     });
 
-    // 3. MOBILE ANIMATION (Auto-Floating Camera Effect)
-    mm.add("(max-width: 768px)", () => {
+    // 3. TABLET & MOBILE ANIMATION (Auto-Floating Camera Effect)
+    // Combine Tablet (769-1024) and Mobile (max 768) logic for auto-float
+    mm.add("(max-width: 1024px)", () => {
         gsap.set(".dj-hero", { 
             opacity: 0, 
             scale: 0.8, 
@@ -69,10 +70,7 @@ const Home = () => {
           .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
           .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
 
-        // --- NEW: AUTO-FLOAT ANIMATION ---
-        // Since there is no mouse, we gently rock the container automatically
-        // to show off the 3D depth.
-        
+        // --- AUTO-FLOAT ANIMATION ---
         // 1. Rock the rings/text
         gsap.to(tiltRef.current, {
             rotationX: 10,  // Tilt up/down
@@ -152,14 +150,21 @@ const Home = () => {
             backface-visibility: hidden;
         }
 
-        @media (max-width: 1024px) {
+        /* --- TABLET RESPONSIVENESS (769px - 1024px) --- */
+        @media (min-width: 769px) and (max-width: 1024px) {
           :root {
-            --orbit-radius: 350px;
-            --ring-size: 600px;
-            --font-size: 2.2rem;
+            --orbit-radius: 320px; /* Reduced from 450px */
+            --ring-size: 600px;    /* Reduced from 800px */
+            --font-size: 2rem;     /* Reduced from 3rem */
+          }
+          
+          .dj-hero {
+            height: 75% !important; /* Slightly smaller than desktop (85%) */
+            bottom: 5% !important;
           }
         }
 
+        /* --- MOBILE RESPONSIVENESS (Max 768px) --- */
         @media (max-width: 768px) {
           :root {
             --orbit-radius: 200px; 
