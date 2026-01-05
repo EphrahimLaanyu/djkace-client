@@ -120,7 +120,7 @@ const Footer = () => {
                     <span style={styles.role}>DEVELOPMENT & CODE</span>
                     <div style={styles.devBadge}>
                          <span style={styles.devName}>J&E MAISON</span>
-                         <a href="mailto:barcodetech@gmail.com" style={styles.devLink}>barcodetech@gmail.com</a>
+                         <a href="mailto:barcodetech2020@gmail.com" style={styles.devLink}>barcodetech2020@gmail.com</a>
                     </div>
                 </div>
                 <div style={styles.creditItem}>

@@ -5,6 +5,9 @@ import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Helmet } from 'react-helmet-async';
 
+// 1. IMPORT YOUR LOGO
+import logoImage from '../assets/Artboard_3_page-0001-removebg-preview.png';
+
 gsap.registerPlugin(ScrollTrigger);
 
 const Navbar = () => {
@@ -22,30 +25,33 @@ const Navbar = () => {
   const phase = useRef(0); 
   const mouseX = useRef(0); 
 
-  const navItems = useMemo(() => [
+  // --- REORGANIZED NAV: SPLIT INTO LEFT & RIGHT ---
+  const leftNavItems = useMemo(() => [
     { label: 'HOME', id: 'home', path: '/' },      
     { label: 'MIXES', id: 'mixes', path: '/mixes' }, 
-    { label: 'YOUTUBE', id: 'youtube', path: '/youtube' },      
+  ], []);
+
+  const rightNavItems = useMemo(() => [
+    { label: 'VIDEOS', id: 'videos', path: '/videos' },      
     { label: 'CONTACTS', id: 'contacts', path: '/contacts' },      
   ], []);
+
+  const allNavItems = [...leftNavItems, ...rightNavItems];
 
   const navigationSchema = {
     "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
-    "name": navItems.map(item => item.label),
-    "url": navItems.map(item => `https://deejaykace.co.ke${item.path}`)
+    "name": allNavItems.map(item => item.label),
+    "url": allNavItems.map(item => `https://deejaykace.co.ke${item.path}`)
   };
 
   // --- 1. SMART HIDE ANIMATION ---
   useGSAP(() => {
-    // Detect Touch/Mobile
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
     const anim = gsap.from(containerRef.current, { 
       yPercent: -100, paused: true, duration: 0.4, ease: "power3.out"
     }).progress(1);
 
-    // FIX: Only auto-hide on Desktop
     let hideTimer = !isTouch ? gsap.delayedCall(1.5, () => {
         if (window.scrollY > 50) anim.reverse();
     }) : null;
@@ -77,8 +83,6 @@ const Navbar = () => {
     });
 
     const navEl = containerRef.current;
-    
-    // Desktop Events Only
     if (!isTouch) {
         navEl.addEventListener("mouseenter", showNavbar);
         navEl.addEventListener("mouseleave", hideNavbar);
@@ -91,14 +95,13 @@ const Navbar = () => {
             if (hideTimer) hideTimer.kill();
         };
     } else {
-        // Mobile tap safety
         const handleTouch = (e) => { if (e.touches[0].clientY < 50) anim.play(); };
         window.addEventListener("touchstart", handleTouch);
         return () => window.removeEventListener("touchstart", handleTouch);
     }
   }, { scope: containerRef });
 
-  // --- 2. CANVAS ENGINE (MODIFIED) ---
+  // --- 2. CANVAS ENGINE ---
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -112,10 +115,8 @@ const Navbar = () => {
     resize();
 
     const render = () => {
-      // --- CHANGE: STOP ANIMATION ON MOBILE ---
       if (window.innerWidth < 768) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Keep the loop alive gently, but draw nothing
           animationFrameId = requestAnimationFrame(render);
           return;
       }
@@ -159,12 +160,12 @@ const Navbar = () => {
     };
   }, []);
 
-  // --- 3. ACTIVE STATE ---
+  // --- 3. ACTIVE STATE & HOVERS ---
   const { contextSafe } = useGSAP({ scope: containerRef });
   const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
-    navItems.forEach((item, index) => {
+    allNavItems.forEach((item, index) => {
         const el = linksRef.current[index];
         if(!el) return;
         if (isActive(item.path)) {
@@ -173,7 +174,7 @@ const Navbar = () => {
             gsap.to(el, { color: '#111', scale: 1, letterSpacing: '2px', duration: 0.3, overwrite: 'auto' });
         }
     });
-  }, [location.pathname, navItems]);
+  }, [location.pathname, allNavItems]);
 
   const onLinkEnter = contextSafe((e) => {
     targetAmplitude.current = 50; 
@@ -188,12 +189,48 @@ const Navbar = () => {
     gsap.to(e.currentTarget, { color: isCurrentPage ? '#E60000' : '#111', scale: 1, letterSpacing: '2px', duration: 0.3, overwrite: 'auto' });
   });
 
+  // --- LOGO INTERACTION (COLOR ONLY) ---
+  const onLogoEnter = contextSafe(() => {
+    targetAmplitude.current = 80; 
+    gsap.to(".nav-logo-mask", { 
+        backgroundColor: '#E60000', 
+        duration: 0.4, 
+        ease: "power1.out" 
+    });
+  });
+  
+  const onLogoLeave = contextSafe(() => {
+    targetAmplitude.current = 0;
+    gsap.to(".nav-logo-mask", { 
+        backgroundColor: '#111', 
+        duration: 0.4 
+    });
+  });
+
   const handleNavigation = (e, id, path) => {
     if (location.pathname === path && path === '/') {
        e.preventDefault();
        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  const renderLinkGroup = (items, offset) => (
+    items.map((item, i) => (
+        <Link 
+            key={i}
+            to={item.path}
+            ref={el => linksRef.current[i + offset] = el} 
+            onClick={(e) => handleNavigation(e, item.id, item.path)} 
+            className="nav-link"
+            style={styles.link}
+            onMouseEnter={onLinkEnter}
+            onMouseLeave={(e) => onLinkLeave(e, item.path)} 
+            itemProp="url"
+        >
+            <span itemProp="name">{item.label}</span>
+        </Link>
+    ))
+  );
 
   return (
     <nav ref={containerRef} style={styles.navWrapper} itemScope itemType="https://schema.org/SiteNavigationElement">
@@ -205,21 +242,29 @@ const Navbar = () => {
       <canvas ref={canvasRef} style={styles.canvas} />
 
       <div className="links-container" style={styles.linksContainer}>
-        {navItems.map((item, i) => (
-            <Link 
-                key={i}
-                to={item.path}
-                ref={el => linksRef.current[i] = el} 
-                onClick={(e) => handleNavigation(e, item.id, item.path)} 
-                className="nav-link"
-                style={styles.link}
-                onMouseEnter={onLinkEnter}
-                onMouseLeave={(e) => onLinkLeave(e, item.path)} 
-                itemProp="url"
-            >
-                <span itemProp="name">{item.label}</span>
-            </Link>
-        ))}
+        
+        {/* LEFT GROUP */}
+        <div className="nav-group-left" style={styles.linkGroup}>
+            {renderLinkGroup(leftNavItems, 0)}
+        </div>
+
+        {/* CENTER LOGO */}
+        <Link 
+            to="/" 
+            className="logo-link-wrapper"
+            onClick={(e) => handleNavigation(e, 'home', '/')}
+            onMouseEnter={onLogoEnter}
+            onMouseLeave={onLogoLeave}
+            style={{ zIndex: 20, display: 'flex', alignItems: 'center' }}
+        >
+             <div className="nav-logo-mask" style={styles.logoMask}></div>
+        </Link>
+
+        {/* RIGHT GROUP */}
+        <div className="nav-group-right" style={styles.linkGroup}>
+            {renderLinkGroup(rightNavItems, 2)}
+        </div>
+
       </div>
 
       <div className="nav-meta" style={styles.metaLeft}>FREQ: 20-20kHZ</div>
@@ -227,27 +272,64 @@ const Navbar = () => {
 
       <style>{`
         @media (max-width: 768px) {
-          /* --- CHANGE: REMOVE CANVAS ON MOBILE --- */
-          canvas {
-            display: none !important;
+          
+          /* 1. Navbar Container Adjustment */
+          nav {
+             height: auto !important;
+             min-height: 110px; /* INCREASED HEIGHT for bigger logo */
+             padding: 10px 0;
+             background: rgba(241, 233, 219, 0.95);
+             backdrop-filter: blur(8px);
           }
 
+          /* 2. Hide Desktop Elements */
+          canvas { display: none !important; }
+          .nav-meta { display: none !important; }
+
+          /* 3. MOBILE GRID LAYOUT */
           .links-container {
-            gap: 12px !important; 
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            grid-template-areas: 
+                "logo logo"   
+                "left right"; 
+            gap: 5px !important;
             width: 100% !important;
             justify-content: center !important;
-            flex-wrap: wrap !important;
             padding: 0 10px;
           }
+          
+          /* 4. Element Positioning */
+          .logo-link-wrapper {
+             grid-area: logo;
+             justify-self: center;
+             margin-bottom: 5px;
+          }
+
+          .nav-group-left {
+             grid-area: left;
+             justify-content: flex-end !important;
+             padding-right: 15px; 
+          }
+
+          .nav-group-right {
+             grid-area: right;
+             justify-content: flex-start !important;
+             padding-left: 15px;
+          }
+
+          /* 5. Mobile Element Sizing */
+          .nav-logo-mask {
+             width: 80px !important;  /* INCREASED SIZE */
+             height: 80px !important; /* INCREASED SIZE */
+             margin: 0 !important;
+          }
+
           .nav-link {
-            font-size: 0.8rem !important;
+            font-size: 0.75rem !important;
             letter-spacing: 1px !important;
             padding: 8px 5px !important;
             color: #111 !important; 
-            opacity: 1 !important;
-          }
-          .nav-meta {
-            display: none !important;
           }
         }
       `}</style>
@@ -271,13 +353,32 @@ const styles = {
     pointerEvents: 'none', zIndex: 1
   },
   linksContainer: {
-    display: 'flex', gap: '8vw', zIndex: 10, pointerEvents: 'auto', alignItems: 'center', position: 'relative'
+    display: 'flex', gap: '3vw', zIndex: 10, pointerEvents: 'auto', alignItems: 'center', position: 'relative'
+  },
+  linkGroup: {
+    display: 'flex', gap: '3vw', alignItems: 'center'
   },
   link: {
     background: 'transparent', border: 'none',
     fontFamily: '"Rajdhani", sans-serif', fontWeight: '800', fontSize: '1rem',
     color: '#111', textDecoration: 'none', letterSpacing: '2px', 
     cursor: 'pointer', position: 'relative', padding: '10px'
+  },
+  // --- DESKTOP SIZE SETTING ---
+  logoMask: {
+    width: '150px', 
+    height: '150px',
+    backgroundColor: '#111', 
+    maskImage: `url(${logoImage})`,
+    WebkitMaskImage: `url(${logoImage})`,
+    maskSize: 'contain',
+    WebkitMaskSize: 'contain',
+    maskPosition: 'center',
+    WebkitMaskPosition: 'center',
+    maskRepeat: 'no-repeat',
+    WebkitMaskRepeat: 'no-repeat',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, transform 0.3s ease', 
   },
   metaLeft: {
     position: 'absolute', left: '50px', top: '50%', transform: 'translateY(-50%)',

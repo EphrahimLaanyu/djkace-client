@@ -24,7 +24,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/mixes" element={<Mixes />} />
             <Route path="/contacts" element={<Contact />} />
-            <Route path="/youtube" element={<YouTube />} />
+            <Route path="/videos" element={<YouTube />} />
           </Routes>
         </main>
 

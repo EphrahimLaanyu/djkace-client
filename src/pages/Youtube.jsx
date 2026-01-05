@@ -148,10 +148,7 @@ const YouTube = () => {
                 
                 {/* FOOTER */}
                 <div style={styles.receiptFooter}>
-                    <div style={styles.totalRow}>
-                        <span>TOTAL RECORDS:</span>
-                        <span>{videos.length}</span>
-                    </div>
+                 
                     <div style={styles.barcode}>|| ||| |||| || ||| || |||||</div>
                     <div style={styles.thankYou}>END OF VISUAL LOG</div>
                 </div>

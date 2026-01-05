@@ -247,7 +247,7 @@ const Footer = () => {
                        <span style={footerStyles.role}>DEVELOPMENT & CODE</span>
                        <div style={footerStyles.devBadge}>
                             <span style={footerStyles.devName}>J&E MAISON</span>
-                            <a href="mailto:barcodetech@gmail.com" style={footerStyles.devLink}>barcodetech@gmail.com</a>
+                            <a href="mailto:barcodetech2020@gmail.com" style={footerStyles.devLink}>barcodetech2020@gmail.com</a>
                        </div>
                    </div>
                    <div style={footerStyles.creditItem}>
@@ -516,15 +516,7 @@ const Mixes = () => {
                     ))}
                 </div>
 
-                <div style={styles.receiptFooter}>
-                    <div style={styles.divider}>--------------------------------</div>
-                    <div style={styles.totalRow}>
-                        <span>TOTAL RECORDS:</span>
-                        <span>{tracks.length}</span>
-                    </div>
-                    <div className="barcode" style={styles.barcode}>|| ||| |||| || ||| || |||||</div>
-                    <div style={styles.thankYou}>END OF TRANSMISSION</div>
-                </div>
+
             </div>
 
             {/* MARQUEE BAND */}

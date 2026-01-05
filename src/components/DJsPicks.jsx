@@ -260,12 +260,8 @@ const DJsPicks = () => {
 
             <div style={styles.receiptFooter}>
                 <div style={styles.divider}>--------------------------------</div>
-                <div style={styles.totalRow}>
-                    <span>TOTAL ITEMS:</span>
-                    <span>05</span>
-                </div>
                 <button onClick={() => navigate('/mixes')} style={styles.viewAllBtn} className="view-all-btn">
-                    VIEW & DOWNLOAD ALL MIXES →
+                    TO ALL MIXES →
                 </button>
                 <div className="barcode" style={styles.barcode}>||| || ||| | |||| ||| || |||||</div>
                 <div style={styles.thankYou}>THANK YOU FOR LISTENING</div>

@@ -106,7 +106,6 @@ const Contact = () => {
                             <label style={styles.label}>ENTER {field}</label>
                             <input type={field === 'EMAIL' ? 'email' : 'text'} name={field.toLowerCase()} value={formData[field.toLowerCase()]} onChange={handleChange} required placeholder={`YOUR ${field}...`} style={styles.input} autoComplete="off" />
                         </div>
-                        <div style={styles.duration}>0{i+3}:00</div>
                     </div>
                 ))}
                 <div className="form-track" style={styles.inputGroup}>
@@ -115,7 +114,6 @@ const Contact = () => {
                         <label style={styles.label}>THE MESSAGE</label>
                         <textarea name="message" value={formData.message} onChange={handleChange} required placeholder="TELL ME ABOUT YOUR PROJECT..." rows="4" style={styles.textarea} />
                     </div>
-                    <div style={styles.duration}>LP</div>
                 </div>
                 <div className="form-track" style={styles.submitRow}>
                     <button type="submit" disabled={status !== 'IDLE'} style={{...styles.submitBtn, backgroundColor: status === 'SENT' ? '#4CAF50' : '#111'}}>

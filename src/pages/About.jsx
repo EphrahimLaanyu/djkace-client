@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -9,8 +9,30 @@ const About = () => {
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   
+  // STATE for dynamic text
+  const [aboutText, setAboutText] = useState("Loading system info...");
+  
   // Generate 40 bars
   const barsArray = new Array(40).fill(0);
+
+  // FETCH DATA
+  useEffect(() => {
+    const fetchAbout = async () => {
+        try {
+            const res = await fetch('https://djkace-api.elaanyu.workers.dev/about');
+            const data = await res.json();
+            if (data && data.about_text) {
+                setAboutText(data.about_text);
+            } else {
+                // Fallback default if DB is empty
+                setAboutText("Just like a frequency spectrum, the set is calculated. High highs. Deep lows. No distortion. Experience the technical side of the African Mzungu.");
+            }
+        } catch (e) {
+            console.error("Failed to fetch about text", e);
+        }
+    };
+    fetchAbout();
+  }, []);
 
   useGSAP(() => {
     // Get all bars
@@ -19,20 +41,20 @@ const About = () => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
-        start: "top center", // Start animating when top of section hits center of screen
-        end: "center center", // End when center of section hits center of screen
-        scrub: 1.5, // Smooth scrubbing effect
+        start: "top center", 
+        end: "center center", 
+        scrub: 1.5, 
       }
     });
 
     // 1. Animate bars to "open" vertically
     tl.to(bars, {
-      scaleY: 0.05, // Shrink to 5% height (creating the gap)
-      transformOrigin: "center", // Shrink from top and bottom towards center
+      scaleY: 0.05, 
+      transformOrigin: "center", 
       ease: "power2.inOut",
       stagger: {
         amount: 1, 
-        from: "center", // Start opening from the center outward
+        from: "center", 
         grid: "auto",
         ease: "power1.out"
       }
@@ -45,12 +67,11 @@ const About = () => {
       filter: "blur(10px)",
       duration: 0.5,
       ease: "power2.out"
-    }, "<0.3"); // Overlap slightly with bar animation
+    }, "<0.3"); 
 
   }, { scope: containerRef });
 
   return (
-    // SEO: Define this section as a Service Description
     <section ref={containerRef} style={styles.analyzerSection} itemScope itemType="https://schema.org/Service">
         
         {/* 1. CONTENT LAYER (Hidden Behind Bars initially) */}
@@ -58,32 +79,17 @@ const About = () => {
             <div style={styles.textContent}>
                 <h4 style={styles.techHeader}>SYSTEM CHECK // 2025</h4>
                 
-                {/* SEO: Main Service Name */}
                 <h2 style={styles.mainHeader} itemProp="name">PRECISION<br/>SOUND</h2>
                 
                 <div style={styles.separator}></div>
                 
-                {/* SEO: Service Description */}
                 <p style={styles.desc} itemProp="description">
-                    Just like a frequency spectrum, the set is calculated.
-                    High highs. Deep lows. No distortion.
-                    Experience the technical side of the African Mzungu.
+                    {aboutText}
                 </p>
                 
-                {/* Tech Stats Grid */}
-                <div style={styles.techGrid}>
-                    <div style={styles.techItem}>
-                        <span style={styles.label}>FORMAT</span>
-                        <span style={styles.value} itemProp="serviceType">DIGITAL / VINYL</span>
-                    </div>
-                    <div style={styles.techItem}>
-                        <span style={styles.label}>RANGE</span>
-                        <span style={styles.value}>20Hz - 20kHz</span>
-                    </div>
-                    <div style={styles.techItem}>
-                        <span style={styles.label}>OUTPUT</span>
-                        <span style={styles.value} itemProp="serviceQuality">HIGH FIDELITY</span>
-                    </div>
+                {/* NEW: Simple Signature Block */}
+                <div style={styles.signatureBlock}>
+                    <span style={styles.signature}>DEEJAY KACE</span>
                 </div>
             </div>
         </div>
@@ -108,7 +114,7 @@ const styles = {
     height: '100vh',
     width: '100%',
     position: 'relative',
-    backgroundColor: '#050505', // Very dark bg
+    backgroundColor: '#050505', 
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -127,13 +133,23 @@ const styles = {
   techHeader: { color: '#E60000', letterSpacing: '5px', fontSize: '0.9rem', marginBottom: '10px' },
   mainHeader: { fontFamily: '"Playfair Display", serif', fontSize: '5rem', lineHeight: '0.9', fontStyle: 'italic', marginBottom: '30px' },
   separator: { width: '2px', height: '60px', background: '#E60000', margin: '0 auto 30px auto' },
-  desc: { fontSize: '1.2rem', fontWeight: '300', lineHeight: '1.6', color: '#aaa', marginBottom: '50px' },
+  desc: { fontSize: '1.2rem', fontWeight: '300', lineHeight: '1.6', color: '#aaa', marginBottom: '40px' },
   
-  // Grid
-  techGrid: { display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #333', paddingTop: '20px' },
-  techItem: { display: 'flex', flexDirection: 'column', alignItems: 'center' },
-  label: { fontSize: '0.8rem', color: '#666', marginBottom: '5px', letterSpacing: '1px' },
-  value: { fontSize: '1rem', fontWeight: 'bold', color: '#E60000' },
+  // NEW: Signature Styles (Replaces Grid)
+  signatureBlock: { 
+      borderTop: '1px solid #333', 
+      paddingTop: '30px',
+      marginTop: '20px',
+      display: 'flex',
+      justifyContent: 'center'
+  },
+  signature: { 
+      fontSize: '1.5rem', 
+      fontWeight: '900', 
+      color: '#E60000', 
+      letterSpacing: '8px',
+      textTransform: 'uppercase'
+  },
 
   // Bars
   barsContainer: {
