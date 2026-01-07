@@ -21,7 +21,8 @@ const formatTime = (seconds) => {
 };
 
 // --- COMPONENT: INLINE PLAYER ---
-const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, onToggle, onSeek, audioUrl, title }) => {
+// ADDED: volume and onVolumeChange props
+const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, volume, onToggle, onSeek, onVolumeChange, audioUrl, title }) => {
     const displayDuration = isPlaying ? duration : totalDuration;
 
     return (
@@ -91,6 +92,18 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, on
                 <span style={styles.timeDisplay}>
                     {formatTime(currentTime)} / {formatTime(displayDuration)}
                 </span>
+
+                {/* --- ADDED VOLUME SLIDER --- */}
+                <div style={styles.volumeContainer} onClick={(e) => e.stopPropagation()}>
+                    <span style={styles.volLabel}>VOL</span>
+                    <input 
+                        type="range" 
+                        min="0" max="1" step="0.05"
+                        value={volume !== undefined ? volume : 1}
+                        onChange={(e) => onVolumeChange && onVolumeChange(parseFloat(e.target.value))}
+                        style={styles.volumeInput}
+                    />
+                </div>
             </div>
         </div>
     );
@@ -323,7 +336,8 @@ const Mixes = () => {
     const itemsRef = useRef([]); 
     const navigate = useNavigate();
     
-    const { playingId, isPlaying, currentTime, duration, toggleTrack, seek } = useAudio();
+    // ADDED: Destructure volume and setVolume
+    const { playingId, isPlaying, currentTime, duration, volume, setVolume, toggleTrack, seek } = useAudio();
     
     const [tracks, setTracks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -507,8 +521,10 @@ const Mixes = () => {
                                 currentTime={playingId === track.id ? currentTime : 0}
                                 duration={playingId === track.id ? duration : 0}
                                 totalDuration={trackDurations[track.id]} 
+                                volume={volume}
                                 onToggle={() => toggleTrack(track)}
                                 onSeek={seek}
+                                onVolumeChange={setVolume}
                                 audioUrl={track.audio} 
                                 title={track.title} 
                             />
@@ -679,6 +695,11 @@ const styles = {
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
     
+    // --- ADDED VOLUME STYLES ---
+    volumeContainer: { display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '5px' },
+    volLabel: { fontSize: '0.65rem', fontWeight: 'bold', opacity: 0.8 },
+    volumeInput: { width: '50px', accentColor: '#333', cursor: 'pointer', height: '3px' },
+
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '600px', marginTop: '20px', opacity: 0.6 },
     totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '20px', padding: '0 5px' },
     barcode: { fontFamily: '"Libre Barcode 39 Text", cursive', fontSize: '2rem', letterSpacing: '4px', transform: 'scaleY(1.5)', marginBottom: '10px' },

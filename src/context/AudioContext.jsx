@@ -6,16 +6,21 @@ const PlayerContext = createContext();
 export const useAudio = () => useContext(PlayerContext);
 
 export const AudioProvider = ({ children }) => {
-    // We keep the logic the same, just wrapped safely
     const audioRef = useRef(new Audio());
     const [playingId, setPlayingId] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [currentTrackData, setCurrentTrackData] = useState(null);
+    
+    // --- ADDED: Volume State (Default 1.0 = 100%) ---
+    const [volume, setVolumeState] = useState(1);
 
     useEffect(() => {
         const audio = audioRef.current;
+        
+        // Ensure volume is set on mount
+        audio.volume = volume;
 
         const updateTime = () => setCurrentTime(audio.currentTime);
         const updateDuration = () => setDuration(audio.duration);
@@ -34,7 +39,16 @@ export const AudioProvider = ({ children }) => {
             audio.removeEventListener('loadedmetadata', updateDuration);
             audio.removeEventListener('ended', onEnded);
         };
-    }, []);
+    }, []); // Empty dependency array is fine here
+
+    // --- ADDED: Volume Control Function ---
+    const setVolume = (val) => {
+        const newVol = parseFloat(val);
+        setVolumeState(newVol);
+        if (audioRef.current) {
+            audioRef.current.volume = newVol;
+        }
+    };
 
     const toggleTrack = (track) => {
         const audio = audioRef.current;
@@ -54,12 +68,12 @@ export const AudioProvider = ({ children }) => {
         audio.pause();
         audio.src = track.audio;
         audio.load();
+        audio.volume = volume; // Ensure volume persists on track change
         
         // --- ADDED: TRACK PLAY COUNT ---
         fetch(`https://djkace-api.elaanyu.workers.dev/tracks/${track.id}/play`, { 
             method: 'POST' 
         }).catch(err => console.error("Analytics Error:", err));
-        // -------------------------------
         
         audio.play()
             .then(() => setIsPlaying(true))
@@ -75,7 +89,6 @@ export const AudioProvider = ({ children }) => {
         setCurrentTime(time);
     };
 
-    // RENDER THE PROVIDER
     return (
         <PlayerContext.Provider value={{ 
             playingId, 
@@ -84,7 +97,10 @@ export const AudioProvider = ({ children }) => {
             duration, 
             toggleTrack, 
             seek,
-            currentTrackData 
+            currentTrackData,
+            // --- EXPORT NEW PROPS ---
+            volume,
+            setVolume
         }}>
             {children}
         </PlayerContext.Provider>

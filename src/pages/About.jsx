@@ -79,7 +79,7 @@ const About = () => {
             <div style={styles.textContent}>
                 <h4 style={styles.techHeader}>SYSTEM CHECK // 2025</h4>
                 
-                <h2 style={styles.mainHeader} itemProp="name">PRECISION<br/>SOUND</h2>
+                <h2 style={styles.mainHeader} itemProp="name">What's the Kace?</h2>
                 
                 <div style={styles.separator}></div>
                 

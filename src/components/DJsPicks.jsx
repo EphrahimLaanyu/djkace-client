@@ -18,8 +18,10 @@ const formatTime = (seconds) => {
 };
 
 // --- COMPONENT: INLINE PLAYER ---
-const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onToggle, onSeek }) => {
+// ADDED: volume, onVolumeChange props
+const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, volume, onToggle, onSeek, onVolumeChange }) => {
     const displayDuration = isPlaying ? duration : totalDuration;
+    
     return (
         <div className="receipt-player" style={styles.playerWrapper}>
             <div style={styles.waveformLine}>
@@ -46,6 +48,18 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, onTogg
                 <span style={styles.timeDisplay}>
                     {formatTime(currentTime)} / {formatTime(displayDuration)}
                 </span>
+
+                {/* --- ADDED VOLUME SLIDER --- */}
+                <div style={styles.volumeContainer} onClick={(e) => e.stopPropagation()}>
+                    <span style={styles.volLabel}>VOL</span>
+                    <input 
+                        type="range" 
+                        min="0" max="1" step="0.05"
+                        value={volume !== undefined ? volume : 1}
+                        onChange={(e) => onVolumeChange && onVolumeChange(parseFloat(e.target.value))}
+                        style={styles.volumeInput}
+                    />
+                </div>
             </div>
         </div>
     );
@@ -56,7 +70,8 @@ const DJsPicks = () => {
     const containerRef = useRef(null);
     const itemsRef = useRef([]); 
     const navigate = useNavigate();
-    const { playingId, isPlaying, currentTime, duration, toggleTrack, seek } = useAudio();
+    // ADDED: Destructure volume and setVolume
+    const { playingId, isPlaying, currentTime, duration, volume, setVolume, toggleTrack, seek } = useAudio();
     const [tracks, setTracks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [trackDurations, setTrackDurations] = useState({});
@@ -74,7 +89,7 @@ const DJsPicks = () => {
                     index: i + 1,
                     title: t.title,
                     artist: t.description?.substring(0, 100) || "Deejay Kace",
-                    genre: t.genre, // ADDED GENRE
+                    genre: t.genre,
                     audio: t.audio_url,
                     cover: t.image_url 
                 }));
@@ -134,22 +149,15 @@ const DJsPicks = () => {
     }, [playingId, tracks]);
 
     const animateRow = (element, isActive) => {
-        // --- GLASSMORPHISM TRANSITION ---
         gsap.to(element, {
-            // Background & Blur
             backgroundColor: isActive ? "rgba(255, 255, 255, 0.45)" : "rgba(255, 255, 255, 0)",
             backdropFilter: isActive ? "blur(12px)" : "blur(0px)",
             webkitBackdropFilter: isActive ? "blur(12px)" : "blur(0px)",
-            
-            // Border & Shadow
             borderColor: isActive ? "rgba(255, 255, 255, 0.6)" : "transparent",
             boxShadow: isActive ? "0 8px 32px 0 rgba(0, 0, 0, 0.1)" : "none",
-            
-            // Movement & Color
             scale: isActive ? 1.02 : 1,
             y: isActive ? -5 : 0,
             color: isActive ? "#E60000" : "#111",
-            
             duration: 0.5,
             ease: "power2.out"
         });
@@ -168,7 +176,6 @@ const DJsPicks = () => {
         if (el && !itemsRef.current.includes(el)) itemsRef.current.push(el);
     };
 
-    // --- SEO: GENERATE MUSIC SCHEMA ---
     const musicSchema = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -178,10 +185,7 @@ const DJsPicks = () => {
             "item": {
                 "@type": "MusicRecording",
                 "name": track.title,
-                "byArtist": {
-                    "@type": "Person",
-                    "name": "DJ Kace"
-                },
+                "byArtist": { "@type": "Person", "name": "DJ Kace" },
                 "duration": trackDurations[track.id] ? `PT${Math.floor(trackDurations[track.id])}S` : undefined,
                 "url": "https://djkace.com/mixes"
             }
@@ -192,7 +196,6 @@ const DJsPicks = () => {
 
     return (
         <div ref={containerRef} style={styles.pageWrapper}>
-            {/* INJECT SCHEMA */}
             <Helmet>
                 <script type="application/ld+json">
                     {JSON.stringify(musicSchema)}
@@ -236,7 +239,6 @@ const DJsPicks = () => {
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div className="track-artist" style={styles.artist}>{track.artist}</div>
-                                    {/* ADDED GENRE DISPLAY */}
                                     <div style={styles.genre}>{track.genre}</div>
                                 </div>
                                 
@@ -250,8 +252,10 @@ const DJsPicks = () => {
                                 currentTime={playingId === track.id ? currentTime : 0}
                                 duration={playingId === track.id ? duration : 0}
                                 totalDuration={trackDurations[track.id]} 
+                                volume={volume}
                                 onToggle={() => toggleTrack(track)}
                                 onSeek={seek}
+                                onVolumeChange={setVolume}
                             />
                         </div>
                     );
@@ -261,7 +265,7 @@ const DJsPicks = () => {
             <div style={styles.receiptFooter}>
                 <div style={styles.divider}>--------------------------------</div>
                 <button onClick={() => navigate('/mixes')} style={styles.viewAllBtn} className="view-all-btn">
-                    TO ALL MIXES →
+                    Download & Other mixes here →
                 </button>
                 <div className="barcode" style={styles.barcode}>||| || ||| | |||| ||| || |||||</div>
                 <div style={styles.thankYou}>THANK YOU FOR LISTENING</div>
@@ -357,6 +361,12 @@ const styles = {
     scrubberContainer: { flexGrow: 1, display: 'flex', alignItems: 'center' },
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
+    
+    // --- ADDED VOLUME STYLES ---
+    volumeContainer: { display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '5px' },
+    volLabel: { fontSize: '0.65rem', fontWeight: 'bold', opacity: 0.8 },
+    volumeInput: { width: '50px', accentColor: '#333', cursor: 'pointer', height: '3px' },
+
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6, display: 'flex', flexDirection: 'column', alignItems: 'center' },
     totalRow: { width: '100%', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '30px', padding: '0 5px' },
     viewAllBtn: { background: 'transparent', border: '2px solid #111', color: '#111', padding: '15px 30px', fontFamily: 'inherit', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', marginBottom: '30px', transition: 'all 0.3s ease', textTransform: 'uppercase' },
