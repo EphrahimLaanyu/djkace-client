@@ -2,185 +2,186 @@ import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
-// --- IMPORT YOUR IMAGE ---
+// --- IMPORTS ---
 import djImage from '../assets/DSC02056-removebg-preview.png';
+import logoImage from '../assets/Artboard_3_page-0001-removebg-preview.png';
 
 const Home = () => {
   const container = useRef();
-  const ringRef = useRef(); 
-  const tiltRef = useRef(); 
-  const audioRingsRef = useRef(); 
-
+  
   useGSAP(() => {
     const mm = gsap.matchMedia();
 
-    // 1. SETUP (Common)
-    gsap.set(".orbit-text", { opacity: 0 });
-    gsap.set(".audio-rings", { opacity: 0, scale: 0.5 });
-    
-    gsap.set([".dj-hero", ".audio-rings", ".orbit-text"], { 
-        force3D: true 
-    });
+    // 1. INITIAL SETUP
+    gsap.set(".hero-img", { y: 100, opacity: 0, scale: 0.9 });
+    gsap.set(".marquee-row", { opacity: 0, y: 50 });
+    gsap.set(".script-text", { scale: 0, rotation: -10, opacity: 0 });
+    gsap.set(".logo-brand", { y: -30, opacity: 0 });
+    gsap.set([".meta-left", ".meta-right"], { opacity: 0 });
 
-    // 2. DESKTOP ANIMATION (Interactive Mouse Tilt)
-    mm.add("(min-width: 1025px)", () => { // Changed to 1025px to separate from Tablet
-        gsap.set(".dj-hero", { 
-            opacity: 0, 
-            scale: 0.8, 
-            filter: "blur(10px) grayscale(100%) contrast(1.1)"
-        });
+    // 2. ENTRANCE ANIMATION
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-        const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
+    tl.to(".logo-brand", { y: 0, opacity: 1, duration: 1 })
+      .to(".marquee-row", { y: 0, opacity: 1, duration: 1, stagger: 0.2 }, "-=0.5")
+      .to(".hero-img", { y: 0, opacity: 1, scale: 1, duration: 1.2, ease: "circ.out" }, "-=0.8")
+      .to(".script-text", { scale: 1, rotation: -5, opacity: 1, duration: 0.8, ease: "back.out(1.7)" }, "-=0.5")
+      .to([".meta-left", ".meta-right"], { opacity: 1, duration: 1 }, "-=0.5");
 
-        tl.to(".dj-hero", { 
-            opacity: 1, scale: 1, filter: "blur(0px) grayscale(100%) contrast(1.1)", duration: 2 
-        })
-        .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
-        .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
-        
-        // --- MOUSE TILT LOGIC ---
+    // 3. INFINITE MARQUEE ANIMATION
+    gsap.to(".marquee-track-1", { xPercent: -50, repeat: -1, duration: 20, ease: "none" });
+    gsap.fromTo(".marquee-track-2", { xPercent: -50 }, { xPercent: 0, repeat: -1, duration: 20, ease: "none" });
+
+    // 4. DESKTOP PARALLAX
+    mm.add("(min-width: 1025px)", () => {
         const handleMouseMove = (e) => {
-            const { innerWidth, innerHeight } = window;
-            const x = (e.clientX / innerWidth - 0.5) * 2;
-            const y = (e.clientY / innerHeight - 0.5) * 2;
-    
-            gsap.to(tiltRef.current, { 
-              rotationX: -y * 20, rotationZ: x * 10, rotationY: x * 20, duration: 1.5, ease: "power2.out", overwrite: "auto"
-            });
-            gsap.to(".dj-hero", { 
-              x: x * 20, y: y * 20, rotationX: -y * 5, rotationY: x * 5, duration: 2, ease: "power2.out", overwrite: "auto"
-            });
-          };
-          window.addEventListener("mousemove", handleMouseMove);
-          return () => window.removeEventListener("mousemove", handleMouseMove);
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            gsap.to(".hero-img", { x: -x * 1.5, y: -y * 1.5, duration: 1 });
+            gsap.to(".script-text", { x: x * 2, y: y * 2, duration: 1 });
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
     });
 
-    // 3. TABLET & MOBILE ANIMATION (Auto-Floating Camera Effect)
-    // Combine Tablet (769-1024) and Mobile (max 768) logic for auto-float
-    mm.add("(max-width: 1024px)", () => {
-        gsap.set(".dj-hero", { 
-            opacity: 0, 
-            scale: 0.8, 
-            filter: "grayscale(100%) contrast(1.1)" 
-        });
-
-        // Intro Animation
-        const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
-        tl.to(".dj-hero", { opacity: 1, scale: 1, duration: 1.5 })
-          .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
-          .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
-
-        // --- AUTO-FLOAT ANIMATION ---
-        // 1. Rock the rings/text
-        gsap.to(tiltRef.current, {
-            rotationX: 10,  // Tilt up/down
-            rotationY: 15,  // Tilt left/right
-            duration: 4,
-            repeat: -1,
-            yoyo: true,     // Go back and forth
-            ease: "sine.inOut"
-        });
-
-        // 2. Gently move the DJ image in opposite direction for parallax
-        gsap.to(".dj-hero", {
-            y: -15,
-            rotationZ: 2,
-            duration: 5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-        });
+    // MOBILE RESPONSIVE ADJUSTMENTS
+    mm.add("(max-width: 767px)", () => {
+      gsap.set(".marquee-wrapper-top", { top: "20%" });
+      gsap.set(".marquee-wrapper-bottom", { bottom: "15%" });
+      gsap.set(".scriptOverlay", { top: "55%", right: "5%" });
+      gsap.set([".meta-left", ".meta-right"], { display: "none" });
+      gsap.set(".hero-img", { objectPosition: "bottom center" });
+      gsap.set(".logo-brand", { height: "50px" });
+      gsap.set(".magazine-wrapper", { 
+        justifyContent: "flex-start",
+        height: "auto",
+        minHeight: "100dvh"
+      });
+      gsap.set(".nav-header", { marginBottom: "30px" });
     });
-
-    // 4. INFINITE ROTATIONS (Common)
-    gsap.to(ringRef.current, { rotationY: 360, duration: 20, repeat: -1, ease: "none", force3D: true });
-    gsap.to(audioRingsRef.current, { rotationZ: 360, duration: 40, repeat: -1, ease: "none", force3D: true });
 
   }, { scope: container });
 
-  const phrase = "DEEJAY KACE • THE AFRICAN MZUNGU • ";
-  const textArray = new Array(4).fill(phrase).join("").split("");
-  const angleStep = 360 / textArray.length;
+  const marqueeText = "THE AFRICAN MZUNGU • THE AFRICAN MZUNGU • THE AFRICAN MZUNGU • ";
 
   return (
-    <div ref={container} style={styles.wrapper}>
+    <div ref={container} style={styles.wrapper} className="magazine-wrapper">
       <div style={styles.noise}></div>
       <div style={styles.vignette}></div>
+      <div style={styles.gridLines}></div>
 
-      <div style={styles.scene}>
-        
-        <img src={djImage} className="dj-hero" alt="DJ Kace" style={styles.djImage} />
+      {/* --- MAIN CONTENT --- */}
+      <div style={styles.mainContent}>
+          
+          {/* 1. HEADER LOGO */}
+          <div style={styles.navHeader} className="nav-header">
+              <img src={logoImage} alt="DJ Kace" className="logo-brand" style={styles.logo} />
+          </div>
 
-        <div ref={tiltRef} style={styles.tiltWrapper}>
-            {/* AUDIO RINGS */}
-            <div ref={audioRingsRef} className="audio-rings" style={styles.audioRingsContainer}>
-               <div style={styles.ringOuter}></div>  
-               <div style={styles.ringDashed}></div> 
-               <div style={styles.ringMiddle}></div> 
-               <div style={styles.ringInner}></div>  
-            </div>
+          {/* 2. CENTER STAGE */}
+          <div style={styles.stageContainer}>
+              
+              {/* MARQUEE 1 (TOP) - NOW OUTLINE (CLEAR) */}
+              <div className="marquee-row" style={styles.marqueeWrapperTop}>
+                  <div className="marquee-track-1" style={styles.marqueeTrack}>
+                      <span style={styles.bigTextOutline}>{marqueeText}</span>
+                      <span style={styles.bigTextOutline}>{marqueeText}</span>
+                  </div>
+              </div>
 
-            {/* TEXT RING */}
-            <div ref={ringRef} style={styles.ringContainer}>
-              {textArray.map((char, i) => (
-                <span key={i} className="orbit-text" style={{
-                    ...styles.char,
-                    transform: `rotateY(${i * angleStep}deg) translateZ(var(--orbit-radius))`
-                }}>
-                  {char}
-                </span>
-              ))}
-            </div>
-        </div>
+              {/* HERO IMAGE */}
+              <div style={styles.imageContainer} className="image-container">
+                  <img 
+                    src={djImage} 
+                    alt="The African Mzungu" 
+                    className="hero-img" 
+                    style={styles.djImage} 
+                  />
+              </div>
+
+              {/* MARQUEE 2 (BOTTOM) - NOW SOLID (BLACK) */}
+              <div className="marquee-row" style={styles.marqueeWrapperBottom}>
+                  <div className="marquee-track-2" style={styles.marqueeTrack}>
+                      <span style={styles.bigTextSolid}>{marqueeText}</span>
+                      <span style={styles.bigTextSolid}>{marqueeText}</span>
+                  </div>
+              </div>
+
+              {/* SCRIPT ACCENT - KENYAN FLAG COLORS */}
+              <div className="script-text" style={styles.scriptOverlay}>
+                  Nairobi's Finest
+              </div>
+
+          </div>
       </div>
 
-      <div style={styles.bottomLeft}>NAIROBI // <span style={{ color: '#009933' }}>KE</span></div>
-      <div style={styles.bottomRight}>EST. 2025</div>
+      {/* --- METADATA --- */}
 
-      {/* --- RESPONSIVE STYLES --- */}
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Oswald:wght@700&display=swap');
+
         :root {
-          --orbit-radius: 450px;
-          --ring-size: 800px;
-          --font-size: 3rem;
+            --font-size-xl: 10vw;
+            --img-height: 75vh; 
+            --script-size: 4vw;
+            --safe-top-padding: 120px; 
         }
 
-        .dj-hero, .audio-rings, .orbit-text, .ringContainer {
-            will-change: transform, opacity;
-            backface-visibility: hidden;
+        .magazine-wrapper {
+            padding-top: var(--safe-top-padding) !important;
+            padding-bottom: 20px;
         }
 
-        /* --- TABLET RESPONSIVENESS (769px - 1024px) --- */
-        @media (min-width: 769px) and (max-width: 1024px) {
-          :root {
-            --orbit-radius: 320px; /* Reduced from 450px */
-            --ring-size: 600px;    /* Reduced from 800px */
-            --font-size: 2rem;     /* Reduced from 3rem */
-          }
-          
-          .dj-hero {
-            height: 75% !important; /* Slightly smaller than desktop (85%) */
-            bottom: 5% !important;
-          }
+        .marquee-row {
+            width: 100vw;
+            overflow: hidden;
+            position: absolute;
+            left: 0;
+            white-space: nowrap;
         }
 
-        /* --- MOBILE RESPONSIVENESS (Max 768px) --- */
-        @media (max-width: 768px) {
-          :root {
-            --orbit-radius: 200px; 
-            --ring-size: 380px;    
-            --font-size: 1.2rem;   
-          }
-          
-          .dj-hero {
-            height: 60% !important; 
-            bottom: 12% !important; /* Raised slightly to clear nav bars */
-          }
+        /* --- TABLET --- */
+        @media (max-width: 1024px) {
+            :root {
+                --font-size-xl: 12vw;
+                --img-height: 60vh;
+                --script-size: 7vw;
+                --safe-top-padding: 140px; 
+            }
+        }
 
-          .bottom-text {
-            font-size: 0.7rem !important;
-            bottom: 20px !important;
-          }
+        /* --- MOBILE --- */
+        @media (max-width: 767px) {
+            :root {
+                --font-size-xl: 15vw; 
+                --img-height: 55vh;   
+                --script-size: 10vw;
+                --safe-top-padding: 130px; 
+            }
+
+            .magazine-wrapper {
+                justify-content: flex-start !important; 
+                height: auto !important; 
+                min-height: 100dvh;
+            }
+
+            .nav-header { margin-bottom: 30px !important; }
+            .logo { height: 50px !important; }
+
+            .marquee-wrapper-top { top: 20% !important; }
+            .marquee-wrapper-bottom { bottom: 15% !important; }
+
+            .hero-img {
+                max-height: 100% !important;
+                object-position: bottom center !important;
+            }
+            
+            .scriptOverlay {
+                top: 55% !important;
+                right: 5% !important;
+            }
+
+            .meta-left, .meta-right { display: none !important; }
         }
       `}</style>
     </div>
@@ -190,49 +191,80 @@ const Home = () => {
 const styles = {
   wrapper: {
     backgroundColor: '#F1E9DB',
-    height: '100dvh', 
+    minHeight: '100dvh', 
     width: '100vw',
-    overflow: 'hidden',
+    overflowX: 'hidden', 
     position: 'relative',
-    fontFamily: '"Rajdhani", sans-serif',
-    display: 'flex', justifyContent: 'center', alignItems: 'center'
+    display: 'flex', 
+    flexDirection: 'column',
+    alignItems: 'center',
+    fontFamily: '"Oswald", sans-serif', 
+    color: '#111',
+    paddingTop: '120px',
+    paddingBottom: '20px'
   },
-  noise: { position: 'absolute', inset: 0, opacity: 0.05, pointerEvents: 'none', background: 'url("https://grains.imgix.net/grain.png")' },
-  vignette: { position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.2) 150%)' },
   
-  scene: { position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', perspective: '1000px', transformStyle: 'preserve-3d' },
+  // FX
+  noise: { position: 'absolute', inset: 0, opacity: 0.05, pointerEvents: 'none', background: 'url("https://grains.imgix.net/grain.png")' },
+  vignette: { position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.1) 150%)' },
+  gridLines: { position: 'absolute', inset: '20px', border: '1px solid rgba(0,0,0,0.05)', pointerEvents: 'none', zIndex: 1 },
 
+  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', zIndex: 10 },
+
+  navHeader: { width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '10px', position: 'relative', zIndex: 100 },
+  logo: { height: '70px', width: 'auto', filter: 'drop-shadow(0 5px 10px rgba(0,0,0,0.1))' },
+
+  stageContainer: { position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexGrow: 1 },
+
+  marqueeWrapperTop: { 
+      position: 'absolute', top: '25%', left: 0, width: '100%', overflow: 'hidden', zIndex: 5,
+      className: 'marquee-wrapper-top' 
+  },
+  marqueeWrapperBottom: { 
+      position: 'absolute', bottom: '25%', left: 0, width: '100%', overflow: 'hidden', zIndex: 5,
+      className: 'marquee-wrapper-bottom' 
+  },
+  marqueeTrack: { display: 'flex', width: 'fit-content', willChange: 'transform' },
+  
+  bigTextSolid: {
+      fontSize: 'var(--font-size-xl)', lineHeight: 1, fontWeight: '900', color: '#111', letterSpacing: '-2px', paddingRight: '50px'
+  },
+  bigTextOutline: {
+      fontSize: 'var(--font-size-xl)', lineHeight: 1, fontWeight: '900', color: 'transparent', WebkitTextStroke: '2px #111', letterSpacing: '-2px', paddingRight: '50px', opacity: 0.6
+  },
+
+  imageContainer: {
+      position: 'relative', height: '75vh', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', zIndex: 10,
+      className: 'imageContainer'
+  },
   djImage: {
-    height: '85%', width: 'auto', position: 'absolute', bottom: 0, zIndex: 10,
-    filter: 'grayscale(100%) contrast(1.1)',
-    pointerEvents: 'none', transformStyle: 'preserve-3d', transform: 'translateZ(50px)'
+      height: '100%', width: 'auto', objectFit: 'contain', objectPosition: 'bottom center',
+      filter: 'grayscale(100%) contrast(1.15) brightness(0.95)', willChange: 'transform'
   },
 
-  tiltWrapper: { position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', transformStyle: 'preserve-3d' },
-
-  // --- AUDIO RINGS ---
-  audioRingsContainer: {
-    position: 'absolute',
-    width: 'var(--ring-size)', height: 'var(--ring-size)', 
-    display: 'flex', justifyContent: 'center', alignItems: 'center',
-    transformStyle: 'preserve-3d', transform: 'translateZ(-100px)',
-  },
-  ringOuter: { position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.1)' },
-  ringDashed: { position: 'absolute', width: '85%', height: '85%', borderRadius: '50%', border: '1px dashed rgba(230, 0, 0, 0.4)' },
-  ringMiddle: { position: 'absolute', width: '60%', height: '60%', borderRadius: '50%', border: '2px solid rgba(0, 153, 51, 0.5)' },
-  ringInner: { position: 'absolute', width: '30%', height: '30%', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.2)', backgroundColor: 'rgba(230, 0, 0, 0.03)' },
-
-  // --- TEXT RING ---
-  ringContainer: { position: 'absolute', transformStyle: 'preserve-3d', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' },
-  char: {
-    position: 'absolute',
-    fontSize: 'var(--font-size)', 
-    fontFamily: '"Playfair Display", serif', fontWeight: '900', fontStyle: 'italic', color: '#E60000',
-    textTransform: 'uppercase', backfaceVisibility: 'visible', whiteSpace: 'pre'
+  // --- KENYAN FLAG GRADIENT ---
+  scriptOverlay: {
+      position: 'absolute', 
+      top: '40%', 
+      right: '15%', 
+      fontFamily: '"Dancing Script", cursive', 
+      fontSize: 'var(--script-size)', 
+      zIndex: 30,
+      transform: 'rotate(-10deg)', 
+      whiteSpace: 'nowrap', 
+      className: 'scriptOverlay',
+      
+      // Gradient: Black -> Red -> Green (Top to Bottom Flag Style)
+      background: 'linear-gradient(to bottom, #000000 33%, #990000 33%, #990000 66%, #006600 66%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      
+      // Use Drop Shadow filter instead of text-shadow for gradient text
+      filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))'
   },
 
-  bottomLeft: { position: 'absolute', bottom: '30px', left: '30px', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem', color: '#111', className: 'bottom-text' },
-  bottomRight: { position: 'absolute', bottom: '30px', right: '30px', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem', color: '#E60000', className: 'bottom-text' }
+  metaLeft: { position: 'absolute', top: '50%', left: '40px', transform: 'translateY(-50%)', fontSize: '0.8rem', fontWeight: 'bold', fontFamily: 'monospace', lineHeight: 1.5, className: 'meta-left' },
+  metaRight: { position: 'absolute', top: '50%', right: '40px', transform: 'translateY(-50%)', textAlign: 'right', fontSize: '0.8rem', fontWeight: 'bold', fontFamily: 'monospace', lineHeight: 1.5, className: 'meta-right' }
 };
 
 export default Home;

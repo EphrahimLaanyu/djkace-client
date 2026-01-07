@@ -31,8 +31,7 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, on
                     <div key={i} style={{
                         ...styles.waveBar,
                         height: isPlaying ? `${Math.random() * 20 + 5}px` : '4px',
-                        // --- MATCHED TO DJS PICKS: GREEN SIGNAL ---
-                        backgroundColor: isPlaying ? '#009933' : '#333' 
+                        backgroundColor: isPlaying ? '#E60000' : '#333'
                     }} />
                 ))}
             </div>
@@ -347,7 +346,7 @@ const Mixes = () => {
                     index: i + 1,
                     title: t.title,
                     artist: t.description || "Deejay Kace",
-                    genre: t.genre, 
+                    genre: t.genre, // ADDED GENRE HERE
                     audio: t.audio_url,
                     cover: t.image_url
                 }));
@@ -413,12 +412,11 @@ const Mixes = () => {
             backgroundColor: isActive ? "rgba(255, 255, 255, 0.45)" : "rgba(255, 255, 255, 0)",
             backdropFilter: isActive ? "blur(12px)" : "blur(0px)",
             webkitBackdropFilter: isActive ? "blur(12px)" : "blur(0px)",
-            // --- MATCHED TO DJS PICKS: GREEN BORDER & GLOW ---
-            borderColor: isActive ? "#009933" : "transparent",
-            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 153, 51, 0.15)" : "none",
+            borderColor: isActive ? "rgba(255, 255, 255, 0.6)" : "transparent",
+            boxShadow: isActive ? "0 8px 32px 0 rgba(0, 0, 0, 0.1)" : "none",
             scale: isActive ? 1.02 : 1,
             y: isActive ? -5 : 0,
-            color: isActive ? "#111" : "#111", // Keeping text dark for readability (just like DJs Picks)
+            color: isActive ? "#E60000" : "#111",
             duration: 0.5,
             ease: "power2.out"
         });
@@ -462,7 +460,7 @@ const Mixes = () => {
                     <div style={styles.divider}>================================</div>
                     <div style={styles.colHeaders}>
                         <span>ID</span>
-                        <span>DESCRIPTION</span>
+                        <span>TITLE // ARTIST</span>
                         <span>LENGTH</span>
                     </div>
                     <div style={styles.divider}>--------------------------------</div>
@@ -494,7 +492,7 @@ const Mixes = () => {
                                 <div style={styles.meta}>
                                     <div className="track-title" style={styles.title}>{track.title}</div>
                                     <div style={styles.artist}>{track.artist}</div>
-                                    {/* ADDED GREEN GENRE */}
+                                    {/* ADDED GENRE DISPLAY */}
                                     <div style={styles.genre}>{track.genre}</div>
                                 </div>
                                 
@@ -552,12 +550,12 @@ const Mixes = () => {
 // --- MIXES STYLES ---
 const styles = {
     mainContainer: {
-        width: '100vw', 
+        width: '100vw', // REVERTED to 100vw to ensure full viewport width
         minHeight: '100vh',
         backgroundColor: '#F1E9DB',
         display: 'flex',
         flexDirection: 'column',
-        overflowX: 'hidden' 
+        overflowX: 'hidden' // Strictly hide horizontal scroll
     },
     pageWrapper: { 
         minHeight: '100vh', 
@@ -581,7 +579,7 @@ const styles = {
         display: 'flex', 
         flexDirection: 'column', 
         alignItems: 'center',
-        margin: '0 auto 40px auto' 
+        margin: '0 auto 40px auto' // Force center
     },
     backBtn: { background: 'transparent', border: '1px solid #111', padding: '10px 20px', marginBottom: '30px', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '0.8rem', transition: 'all 0.2s', ':hover': { background: '#111', color: '#fff' } },
     brandTitle: { fontSize: '2.5rem', fontWeight: '900', marginBottom: '5px', lineHeight: 1 },
@@ -597,7 +595,7 @@ const styles = {
         display: 'flex', 
         flexDirection: 'column',
         gap: '20px',
-        margin: '0 auto' 
+        margin: '0 auto' // Force center
     },
     
     // UPDATED ROW STYLE FOR GLASSMORPHISM
@@ -649,13 +647,13 @@ const styles = {
         marginTop: '5px'
     },
 
-    // MATCHED TO DJS PICKS: GREEN GENRE
+    // ADDED GENRE STYLE
     genre: {
         fontSize: '0.7rem',
         fontWeight: 'bold',
         marginTop: '3px',
         textTransform: 'uppercase',
-        color: '#009933', // Green
+        color: '#E60000',
         letterSpacing: '1px'
     },
     
@@ -726,7 +724,7 @@ const footerStyles = {
   
     // --- LEFT SIDE: LINER NOTES ---
     linerNotes: {
-      flex: '1 1 300px', 
+      flex: '1 1 300px', // Prevents overflow on mobile
       maxWidth: '100%', 
       padding: '60px 40px',
       display: 'flex', flexDirection: 'column', justifyContent: 'center',
@@ -778,7 +776,7 @@ const footerStyles = {
   
     // --- RIGHT SIDE: THE RECORD ---
     recordContainer: {
-      flex: '1 1 300px', 
+      flex: '1 1 300px', // Prevents overflow on mobile
       maxWidth: '100%', 
       backgroundColor: '#111', 
       display: 'flex', justifyContent: 'center', alignItems: 'center',

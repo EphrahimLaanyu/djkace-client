@@ -276,7 +276,7 @@ const Navbar = () => {
           /* 1. Navbar Container Adjustment */
           nav {
              height: auto !important;
-             min-height: 110px; /* INCREASED HEIGHT for bigger logo */
+             min-height: 60px; /* Reduced height since logo is gone */
              padding: 10px 0;
              background: rgba(241, 233, 219, 0.95);
              backdrop-filter: blur(8px);
@@ -286,49 +286,30 @@ const Navbar = () => {
           canvas { display: none !important; }
           .nav-meta { display: none !important; }
 
-          /* 3. MOBILE GRID LAYOUT */
+          /* 3. MOBILE GRID LAYOUT - NO LOGO */
           .links-container {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            grid-template-areas: 
-                "logo logo"   
-                "left right"; 
-            gap: 5px !important;
-            width: 100% !important;
+            display: flex !important; /* Changed from grid to flex */
+            flex-wrap: wrap !important;
             justify-content: center !important;
+            gap: 15px !important;
+            width: 100% !important;
             padding: 0 10px;
           }
           
-          /* 4. Element Positioning */
+          /* 4. Hide Logo Wrapper */
           .logo-link-wrapper {
-             grid-area: logo;
-             justify-self: center;
-             margin-bottom: 5px;
+             display: none !important; /* HIDE LOGO */
           }
 
-          .nav-group-left {
-             grid-area: left;
-             justify-content: flex-end !important;
-             padding-right: 15px; 
-          }
-
-          .nav-group-right {
-             grid-area: right;
-             justify-content: flex-start !important;
-             padding-left: 15px;
-          }
-
-          /* 5. Mobile Element Sizing */
-          .nav-logo-mask {
-             width: 80px !important;  /* INCREASED SIZE */
-             height: 80px !important; /* INCREASED SIZE */
-             margin: 0 !important;
+          /* 5. Group Styling */
+          .nav-group-left, .nav-group-right {
+             gap: 15px !important;
           }
 
           .nav-link {
-            font-size: 0.75rem !important;
+            font-size: 0.8rem !important;
             letter-spacing: 1px !important;
-            padding: 8px 5px !important;
+            padding: 5px !important;
             color: #111 !important; 
           }
         }
