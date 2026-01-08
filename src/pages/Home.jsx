@@ -3,10 +3,10 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 // --- IMPORT YOUR IMAGE ---
-import djImage from '../assets/LogoURL.png';
+import djImage from '../assets/logourldarkblank.png';
 
 // ==========================================
-// 1. MAIN COMPONENT (Switcher)
+// 1. MAIN COMPONENT (Switcher) 
 // ==========================================
 const Home = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -51,6 +51,7 @@ const MobileDesign = () => {
         {/* THE SHIELD (CENTERPIECE) */}
         <div style={mobileStyles.imageContainer}>
             <div style={mobileStyles.redLineVertical}></div>
+            {/* IMAGE IS HERE - Style updated below */}
             <img src={djImage} alt="Kace Shield" style={mobileStyles.shieldImage} />
         </div>
 
@@ -167,6 +168,7 @@ const DesktopOriginal = () => {
         <div style={styles.noise}></div>
         <div style={styles.vignette}></div>
         <div style={styles.scene}>
+          {/* IMAGE IS HERE - Style updated below */}
           <img src={djImage} className="dj-hero" alt="DJ Kace" style={styles.djImage} />
           <div ref={tiltRef} style={styles.tiltWrapper}>
               <div ref={audioRingsRef} className="audio-rings" style={styles.audioRingsContainer}>
@@ -261,14 +263,14 @@ const mobileStyles = {
         fontWeight: '900',
         lineHeight: '0.8',
         color: 'transparent',
-        WebkitTextStroke: '2px #111', // Outline effect
+        WebkitTextStroke: '2px #E60000', // UPDATED: Changed to Red
         letterSpacing: '-2px',
     },
     titleSolid: {
         fontSize: '4.5rem',
         fontWeight: '900',
         lineHeight: '0.8',
-        color: '#111',
+        color: '#E60000', // UPDATED: Changed to Red
         letterSpacing: '-2px',
     },
 
@@ -286,7 +288,8 @@ const mobileStyles = {
         width: '100%',
         height: '100%',
         objectFit: 'contain',
-        filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.3))', // Strong shadow for pop
+        // UPDATED: Added grayscale(100%) to the existing drop-shadow filter
+        filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.3)) grayscale(100%)', 
         zIndex: 5
     },
     // Decorative line behind the shield
@@ -332,6 +335,8 @@ const styles = {
   scene: { position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', perspective: '1000px', transformStyle: 'preserve-3d' },
   djImage: {
     height: '75%', width: 'auto', position: 'absolute', bottom: '10%', zIndex: 10,
+    // UPDATED: Added grayscale filter here
+    filter: 'grayscale(100%)',
     pointerEvents: 'none', transformStyle: 'preserve-3d', transform: 'translateZ(50px)'
   },
   tiltWrapper: { position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', transformStyle: 'preserve-3d' },
