@@ -1,270 +1,315 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
-// --- IMPORTS ---
-import djImage from '../assets/DSC02056-removebg-preview.png';
-import logoImage from '../assets/Artboard_3_page-0001-removebg-preview.png';
+// --- IMPORT YOUR IMAGE ---
+import djImage from '../assets/LogoURL.png';
 
+// ==========================================
+// 1. MAIN COMPONENT (Switcher)
+// ==========================================
 const Home = () => {
-  const container = useRef();
-  
-  useGSAP(() => {
-    const mm = gsap.matchMedia();
+  const [isMobile, setIsMobile] = useState(false);
 
-    // 1. INITIAL SETUP
-    gsap.set(".hero-img", { y: 100, opacity: 0, scale: 0.9 });
-    gsap.set(".marquee-row", { opacity: 0, y: 50 });
-    gsap.set(".script-text", { scale: 0, rotation: -10, opacity: 0 });
-    gsap.set(".logo-brand", { y: -30, opacity: 0 });
-    gsap.set([".meta-left", ".meta-right"], { opacity: 0 });
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-    // 2. ENTRANCE ANIMATION
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+  return isMobile ? <MobileDesign /> : <DesktopOriginal />;
+};
 
-    tl.to(".logo-brand", { y: 0, opacity: 1, duration: 1 })
-      .to(".marquee-row", { y: 0, opacity: 1, duration: 1, stagger: 0.2 }, "-=0.5")
-      .to(".hero-img", { y: 0, opacity: 1, scale: 1, duration: 1.2, ease: "circ.out" }, "-=0.8")
-      .to(".script-text", { scale: 1, rotation: -5, opacity: 1, duration: 0.8, ease: "back.out(1.7)" }, "-=0.5")
-      .to([".meta-left", ".meta-right"], { opacity: 1, duration: 1 }, "-=0.5");
-
-    // 3. INFINITE MARQUEE ANIMATION
-    gsap.to(".marquee-track-1", { xPercent: -50, repeat: -1, duration: 20, ease: "none" });
-    gsap.fromTo(".marquee-track-2", { xPercent: -50 }, { xPercent: 0, repeat: -1, duration: 20, ease: "none" });
-
-    // 4. DESKTOP PARALLAX
-    mm.add("(min-width: 1025px)", () => {
-        const handleMouseMove = (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 20;
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-            gsap.to(".hero-img", { x: -x * 1.5, y: -y * 1.5, duration: 1 });
-            gsap.to(".script-text", { x: x * 2, y: y * 2, duration: 1 });
-        };
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-    });
-
-    // MOBILE RESPONSIVE ADJUSTMENTS
-    mm.add("(max-width: 767px)", () => {
-      gsap.set(".marquee-wrapper-top", { top: "20%" });
-      gsap.set(".marquee-wrapper-bottom", { bottom: "15%" });
-      gsap.set(".scriptOverlay", { top: "55%", right: "5%" });
-      gsap.set([".meta-left", ".meta-right"], { display: "none" });
-      gsap.set(".hero-img", { objectPosition: "bottom center" });
-      gsap.set(".logo-brand", { height: "50px" });
-      gsap.set(".magazine-wrapper", { 
-        justifyContent: "flex-start",
-        height: "auto",
-        minHeight: "100dvh"
-      });
-      gsap.set(".nav-header", { marginBottom: "30px" });
-    });
-
-  }, { scope: container });
-
-  const marqueeText = "THE AFRICAN MZUNGU • THE AFRICAN MZUNGU • THE AFRICAN MZUNGU • ";
-
+// ==========================================
+// 2. MOBILE COMPONENT (Static, Stylish Poster)
+// ==========================================
+const MobileDesign = () => {
+  // No GSAP, No Refs, just pure style.
   return (
-    <div ref={container} style={styles.wrapper} className="magazine-wrapper">
-      <div style={styles.noise}></div>
-      <div style={styles.vignette}></div>
-      <div style={styles.gridLines}></div>
+    <div style={mobileStyles.wrapper}>
+      {/* STATIC NOISE OVERLAY */}
+      <div style={mobileStyles.noise}></div>
 
-      {/* --- MAIN CONTENT --- */}
-      <div style={styles.mainContent}>
-          
-          {/* 1. HEADER LOGO */}
-          <div style={styles.navHeader} className="nav-header">
-              <img src={logoImage} alt="DJ Kace" className="logo-brand" style={styles.logo} />
-          </div>
-
-          {/* 2. CENTER STAGE */}
-          <div style={styles.stageContainer}>
-              
-              {/* MARQUEE 1 (TOP) - NOW OUTLINE (CLEAR) */}
-              <div className="marquee-row" style={styles.marqueeWrapperTop}>
-                  <div className="marquee-track-1" style={styles.marqueeTrack}>
-                      <span style={styles.bigTextOutline}>{marqueeText}</span>
-                      <span style={styles.bigTextOutline}>{marqueeText}</span>
-                  </div>
-              </div>
-
-              {/* HERO IMAGE */}
-              <div style={styles.imageContainer} className="image-container">
-                  <img 
-                    src={djImage} 
-                    alt="The African Mzungu" 
-                    className="hero-img" 
-                    style={styles.djImage} 
-                  />
-              </div>
-
-              {/* MARQUEE 2 (BOTTOM) - NOW SOLID (BLACK) */}
-              <div className="marquee-row" style={styles.marqueeWrapperBottom}>
-                  <div className="marquee-track-2" style={styles.marqueeTrack}>
-                      <span style={styles.bigTextSolid}>{marqueeText}</span>
-                      <span style={styles.bigTextSolid}>{marqueeText}</span>
-                  </div>
-              </div>
-
-              {/* SCRIPT ACCENT - KENYAN FLAG COLORS */}
-              <div className="script-text" style={styles.scriptOverlay}>
-                  Nairobi's Finest
-              </div>
-
-          </div>
+      {/* TOP BAR */}
+      <div style={mobileStyles.topBar}>
+        <span>NAIROBI <span style={{ color: '#009933' }}>//</span> KE</span>
+        <span>VOL. 01</span>
       </div>
 
-      {/* --- METADATA --- */}
+      {/* MAIN CONTENT - TYPOGRAPHY SANDWICH */}
+      <div style={mobileStyles.container}>
+        
+        {/* BIG TOP TEXT */}
+        <h1 style={mobileStyles.titleOutline}>DEEJAY</h1>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Oswald:wght@700&display=swap');
+        {/* THE SHIELD (CENTERPIECE) */}
+        <div style={mobileStyles.imageContainer}>
+            <div style={mobileStyles.redLineVertical}></div>
+            <img src={djImage} alt="Kace Shield" style={mobileStyles.shieldImage} />
+        </div>
 
-        :root {
-            --font-size-xl: 10vw;
-            --img-height: 75vh; 
-            --script-size: 4vw;
-            --safe-top-padding: 120px; 
-        }
+        {/* BIG BOTTOM TEXT */}
+        <h1 style={mobileStyles.titleSolid}>KACE</h1>
 
-        .magazine-wrapper {
-            padding-top: var(--safe-top-padding) !important;
-            padding-bottom: 20px;
-        }
+        {/* TAGLINE */}
+        <div style={mobileStyles.taglineBox}>
+            <span style={mobileStyles.taglineText}>THE AFRICAN MZUNGU</span>
+        </div>
 
-        .marquee-row {
-            width: 100vw;
-            overflow: hidden;
-            position: absolute;
-            left: 0;
-            white-space: nowrap;
-        }
+      </div>
 
-        /* --- TABLET --- */
-        @media (max-width: 1024px) {
-            :root {
-                --font-size-xl: 12vw;
-                --img-height: 60vh;
-                --script-size: 7vw;
-                --safe-top-padding: 140px; 
-            }
-        }
-
-        /* --- MOBILE --- */
-        @media (max-width: 767px) {
-            :root {
-                --font-size-xl: 15vw; 
-                --img-height: 55vh;   
-                --script-size: 10vw;
-                --safe-top-padding: 130px; 
-            }
-
-            .magazine-wrapper {
-                justify-content: flex-start !important; 
-                height: auto !important; 
-                min-height: 100dvh;
-            }
-
-            .nav-header { margin-bottom: 30px !important; }
-            .logo { height: 50px !important; }
-
-            .marquee-wrapper-top { top: 20% !important; }
-            .marquee-wrapper-bottom { bottom: 15% !important; }
-
-            .hero-img {
-                max-height: 100% !important;
-                object-position: bottom center !important;
-            }
-            
-            .scriptOverlay {
-                top: 55% !important;
-                right: 5% !important;
-            }
-
-            .meta-left, .meta-right { display: none !important; }
-        }
-      `}</style>
+      {/* BOTTOM BAR */}
+      <div style={mobileStyles.bottomBar}>
+        EST. 2025 • ALL RIGHTS RESERVED
+      </div>
     </div>
   );
 };
 
+// ==========================================
+// 3. DESKTOP COMPONENT (Original - Untouched)
+// ==========================================
+const DesktopOriginal = () => {
+    const container = useRef();
+    const ringRef = useRef(); 
+    const tiltRef = useRef(); 
+    const audioRingsRef = useRef(); 
+  
+    useGSAP(() => {
+      const mm = gsap.matchMedia();
+      gsap.set(".orbit-text", { opacity: 0 });
+      gsap.set(".audio-rings", { opacity: 0, scale: 0.5 });
+      gsap.set([".dj-hero", ".audio-rings", ".orbit-text"], { force3D: true });
+  
+      mm.add("(min-width: 769px)", () => {
+          gsap.set(".dj-hero", { opacity: 0, scale: 0.8 });
+          const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
+          tl.to(".dj-hero", { opacity: 1, scale: 1, duration: 2 })
+            .to(".audio-rings", { opacity: 1, scale: 1, duration: 1.5 }, "<") 
+            .to(".orbit-text", { opacity: 1, duration: 1, stagger: 0.05 }, "-=0.5");
+          
+          const handleMouseMove = (e) => {
+              const { innerWidth, innerHeight } = window;
+              const x = (e.clientX / innerWidth - 0.5) * 2;
+              const y = (e.clientY / innerHeight - 0.5) * 2;
+              gsap.to(tiltRef.current, { 
+                rotationX: -y * 20, rotationZ: x * 10, rotationY: x * 20, duration: 1.5, ease: "power2.out", overwrite: "auto"
+              });
+              gsap.to(".dj-hero", { 
+                x: x * 20, y: y * 20, rotationX: -y * 5, rotationY: x * 5, duration: 2, ease: "power2.out", overwrite: "auto"
+              });
+          };
+          window.addEventListener("mousemove", handleMouseMove);
+          return () => window.removeEventListener("mousemove", handleMouseMove);
+      });
+  
+      gsap.to(ringRef.current, { rotationY: 360, duration: 20, repeat: -1, ease: "none", force3D: true });
+      gsap.to(audioRingsRef.current, { rotationZ: 360, duration: 40, repeat: -1, ease: "none", force3D: true });
+  
+    }, { scope: container });
+  
+    const phrase = "DEEJAY KACE • THE AFRICAN MZUNGU • ";
+    const textArray = new Array(4).fill(phrase).join("").split("");
+    const angleStep = 360 / textArray.length;
+  
+    return (
+      <div ref={container} style={styles.wrapper}>
+        <div style={styles.noise}></div>
+        <div style={styles.vignette}></div>
+        <div style={styles.scene}>
+          <img src={djImage} className="dj-hero" alt="DJ Kace" style={styles.djImage} />
+          <div ref={tiltRef} style={styles.tiltWrapper}>
+              <div ref={audioRingsRef} className="audio-rings" style={styles.audioRingsContainer}>
+                 <div style={styles.ringOuter}></div>  
+                 <div style={styles.ringDashed}></div> 
+                 <div style={styles.ringMiddle}></div> 
+                 <div style={styles.ringInner}></div>  
+              </div>
+              <div ref={ringRef} style={styles.ringContainer}>
+                {textArray.map((char, i) => (
+                  <span key={i} className="orbit-text" style={{
+                      ...styles.char,
+                      transform: `rotateY(${i * angleStep}deg) translateZ(450px)`
+                  }}>
+                    {char}
+                  </span>
+                ))}
+              </div>
+          </div>
+        </div>
+        <div style={styles.bottomLeft}>NAIROBI // <span style={{ color: '#009933' }}>KE</span></div>
+        <div style={styles.bottomRight}>EST. 2025</div>
+      </div>
+    );
+};
+
+// ==========================================
+// 4. STYLES
+// ==========================================
+
+// --- NEW MOBILE STYLES (Static Poster) ---
+const mobileStyles = {
+    wrapper: {
+        backgroundColor: '#F1E9DB',
+        height: '100dvh', // Dynamic viewport height
+        width: '100vw', 
+        overflow: 'hidden', 
+        position: 'relative',
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'space-between', // Push top/bottom bars apart
+        alignItems: 'center',
+        fontFamily: '"Rajdhani", sans-serif',
+        padding: '20px',
+        boxSizing: 'border-box'
+    },
+    noise: { 
+        position: 'absolute', inset: 0, opacity: 0.08, 
+        pointerEvents: 'none', background: 'url("https://grains.imgix.net/grain.png")', 
+        zIndex: 0
+    },
+    
+    // --- BARS ---
+    topBar: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '0.8rem',
+        fontWeight: '900',
+        letterSpacing: '2px',
+        color: '#111',
+        borderBottom: '2px solid #111',
+        paddingBottom: '10px',
+        zIndex: 2
+    },
+    bottomBar: {
+        width: '100%',
+        textAlign: 'center',
+        fontSize: '0.7rem',
+        fontWeight: 'bold',
+        letterSpacing: '3px',
+        color: '#E60000',
+        borderTop: '2px solid #111',
+        paddingTop: '15px',
+        zIndex: 2
+    },
+
+    // --- MAIN CONTENT ---
+    container: {
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        zIndex: 1
+    },
+
+    // Typography
+    titleOutline: {
+        fontSize: '4.5rem',
+        fontWeight: '900',
+        lineHeight: '0.8',
+        color: 'transparent',
+        WebkitTextStroke: '2px #111', // Outline effect
+        margin: 0,
+        letterSpacing: '-2px',
+        position: 'relative',
+        zIndex: 2
+    },
+    titleSolid: {
+        fontSize: '4.5rem',
+        fontWeight: '900',
+        lineHeight: '0.8',
+        color: '#111',
+        margin: 0,
+        letterSpacing: '-2px',
+        position: 'relative',
+        zIndex: 2
+    },
+
+    // The Shield Layout
+    imageContainer: {
+        position: 'relative',
+        width: '220px',
+        height: '220px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '10px 0', // Space between "DEEJAY" and "KACE"
+    },
+    shieldImage: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.3))', // Strong shadow for pop
+        zIndex: 5
+    },
+    // Decorative line behind the shield
+    redLineVertical: {
+        position: 'absolute',
+        width: '2px',
+        height: '140%', // Stretches behind text
+        backgroundColor: '#E60000',
+        top: '-20%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1
+    },
+
+    // Tagline
+    taglineBox: {
+        marginTop: '30px',
+        backgroundColor: '#111',
+        padding: '5px 15px',
+        transform: 'skewX(-10deg)' // Stylish slant
+    },
+    taglineText: {
+        color: '#F1E9DB',
+        fontWeight: 'bold',
+        letterSpacing: '2px',
+        fontSize: '0.9rem',
+        transform: 'skewX(10deg)', // Un-slant text
+        display: 'inline-block'
+    }
+};
+
+// --- DESKTOP STYLES (Original) ---
 const styles = {
   wrapper: {
     backgroundColor: '#F1E9DB',
-    minHeight: '100dvh', 
-    width: '100vw',
-    overflowX: 'hidden', 
-    position: 'relative',
-    display: 'flex', 
-    flexDirection: 'column',
-    alignItems: 'center',
-    fontFamily: '"Oswald", sans-serif', 
-    color: '#111',
-    paddingTop: '120px',
-    paddingBottom: '20px'
+    height: '100dvh', width: '100vw',
+    overflow: 'hidden', position: 'relative',
+    fontFamily: '"Rajdhani", sans-serif',
+    display: 'flex', justifyContent: 'center', alignItems: 'center'
   },
-  
-  // FX
   noise: { position: 'absolute', inset: 0, opacity: 0.05, pointerEvents: 'none', background: 'url("https://grains.imgix.net/grain.png")' },
-  vignette: { position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.1) 150%)' },
-  gridLines: { position: 'absolute', inset: '20px', border: '1px solid rgba(0,0,0,0.05)', pointerEvents: 'none', zIndex: 1 },
-
-  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', zIndex: 10 },
-
-  navHeader: { width: '100%', display: 'flex', justifyContent: 'center', marginBottom: '10px', position: 'relative', zIndex: 100 },
-  logo: { height: '70px', width: 'auto', filter: 'drop-shadow(0 5px 10px rgba(0,0,0,0.1))' },
-
-  stageContainer: { position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexGrow: 1 },
-
-  marqueeWrapperTop: { 
-      position: 'absolute', top: '25%', left: 0, width: '100%', overflow: 'hidden', zIndex: 5,
-      className: 'marquee-wrapper-top' 
-  },
-  marqueeWrapperBottom: { 
-      position: 'absolute', bottom: '25%', left: 0, width: '100%', overflow: 'hidden', zIndex: 5,
-      className: 'marquee-wrapper-bottom' 
-  },
-  marqueeTrack: { display: 'flex', width: 'fit-content', willChange: 'transform' },
-  
-  bigTextSolid: {
-      fontSize: 'var(--font-size-xl)', lineHeight: 1, fontWeight: '900', color: '#111', letterSpacing: '-2px', paddingRight: '50px'
-  },
-  bigTextOutline: {
-      fontSize: 'var(--font-size-xl)', lineHeight: 1, fontWeight: '900', color: 'transparent', WebkitTextStroke: '2px #111', letterSpacing: '-2px', paddingRight: '50px', opacity: 0.6
-  },
-
-  imageContainer: {
-      position: 'relative', height: '75vh', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', zIndex: 10,
-      className: 'imageContainer'
-  },
+  vignette: { position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle, transparent 40%, rgba(0,0,0,0.2) 150%)' },
+  scene: { position: 'relative', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', perspective: '1000px', transformStyle: 'preserve-3d' },
   djImage: {
-      height: '100%', width: 'auto', objectFit: 'contain', objectPosition: 'bottom center',
-      filter: 'grayscale(100%) contrast(1.15) brightness(0.95)', willChange: 'transform'
+    height: '75%', width: 'auto', position: 'absolute', bottom: '10%', zIndex: 10,
+    pointerEvents: 'none', transformStyle: 'preserve-3d', transform: 'translateZ(50px)'
   },
-
-  // --- KENYAN FLAG GRADIENT ---
-  scriptOverlay: {
-      position: 'absolute', 
-      top: '40%', 
-      right: '15%', 
-      fontFamily: '"Dancing Script", cursive', 
-      fontSize: 'var(--script-size)', 
-      zIndex: 30,
-      transform: 'rotate(-10deg)', 
-      whiteSpace: 'nowrap', 
-      className: 'scriptOverlay',
-      
-      // Gradient: Black -> Red -> Green (Top to Bottom Flag Style)
-      background: 'linear-gradient(to bottom, #000000 33%, #990000 33%, #990000 66%, #006600 66%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      
-      // Use Drop Shadow filter instead of text-shadow for gradient text
-      filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.2))'
+  tiltWrapper: { position: 'absolute', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', transformStyle: 'preserve-3d' },
+  audioRingsContainer: {
+    position: 'absolute', width: '800px', height: '800px', 
+    display: 'flex', justifyContent: 'center', alignItems: 'center',
+    transformStyle: 'preserve-3d', transform: 'translateZ(-100px)',
   },
-
-  metaLeft: { position: 'absolute', top: '50%', left: '40px', transform: 'translateY(-50%)', fontSize: '0.8rem', fontWeight: 'bold', fontFamily: 'monospace', lineHeight: 1.5, className: 'meta-left' },
-  metaRight: { position: 'absolute', top: '50%', right: '40px', transform: 'translateY(-50%)', textAlign: 'right', fontSize: '0.8rem', fontWeight: 'bold', fontFamily: 'monospace', lineHeight: 1.5, className: 'meta-right' }
+  ringOuter: { position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(0,0,0,0.1)' },
+  ringDashed: { position: 'absolute', width: '85%', height: '85%', borderRadius: '50%', border: '1px dashed rgba(230, 0, 0, 0.4)' },
+  ringMiddle: { position: 'absolute', width: '60%', height: '60%', borderRadius: '50%', border: '2px solid rgba(0, 153, 51, 0.5)' },
+  ringInner: { position: 'absolute', width: '30%', height: '30%', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.2)', backgroundColor: 'rgba(230, 0, 0, 0.03)' },
+  ringContainer: { position: 'absolute', transformStyle: 'preserve-3d', width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' },
+  char: {
+    position: 'absolute',
+    fontSize: '3rem', 
+    fontFamily: '"Playfair Display", serif', fontWeight: '900', fontStyle: 'italic', color: '#E60000',
+    textTransform: 'uppercase', backfaceVisibility: 'visible', whiteSpace: 'pre'
+  },
+  bottomLeft: { position: 'absolute', bottom: '30px', left: '30px', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem', color: '#111' },
+  bottomRight: { position: 'absolute', bottom: '30px', right: '30px', fontWeight: 'bold', letterSpacing: '2px', fontSize: '0.8rem', color: '#E60000' }
 };
 
 export default Home;

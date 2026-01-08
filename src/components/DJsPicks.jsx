@@ -18,12 +18,12 @@ const formatTime = (seconds) => {
 };
 
 // --- COMPONENT: INLINE PLAYER ---
-// ADDED: volume, onVolumeChange props
 const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, volume, onToggle, onSeek, onVolumeChange }) => {
     const displayDuration = isPlaying ? duration : totalDuration;
     
     return (
         <div className="receipt-player" style={styles.playerWrapper}>
+            {/* 1. WAVEFORM ROW */}
             <div style={styles.waveformLine}>
                 {Array(20).fill(0).map((_, i) => (
                     <div key={i} style={{
@@ -33,6 +33,8 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, volume
                     }} />
                 ))}
             </div>
+
+            {/* 2. CONTROLS ROW (Play, Scrubber, Time) */}
             <div className="controls-row" style={styles.controlsRow}>
                 <button onClick={(e) => { e.stopPropagation(); onToggle(); }} style={styles.playBtn}>
                     {isPlaying ? "PAUSE" : "PLAY"}
@@ -48,18 +50,18 @@ const ReceiptPlayer = ({ isPlaying, currentTime, duration, totalDuration, volume
                 <span style={styles.timeDisplay}>
                     {formatTime(currentTime)} / {formatTime(displayDuration)}
                 </span>
+            </div>
 
-                {/* --- ADDED VOLUME SLIDER --- */}
-                <div style={styles.volumeContainer} onClick={(e) => e.stopPropagation()}>
-                    <span style={styles.volLabel}>VOL</span>
-                    <input 
-                        type="range" 
-                        min="0" max="1" step="0.05"
-                        value={volume !== undefined ? volume : 1}
-                        onChange={(e) => onVolumeChange && onVolumeChange(parseFloat(e.target.value))}
-                        style={styles.volumeInput}
-                    />
-                </div>
+            {/* 3. VOLUME ROW (New separate row below controls) */}
+            <div style={styles.volumeRow} onClick={(e) => e.stopPropagation()}>
+                <span style={styles.volLabel}>VOLUME</span>
+                <input 
+                    type="range" 
+                    min="0" max="1" step="0.05"
+                    value={volume !== undefined ? volume : 1}
+                    onChange={(e) => onVolumeChange && onVolumeChange(parseFloat(e.target.value))}
+                    style={styles.volumeInput}
+                />
             </div>
         </div>
     );
@@ -70,7 +72,6 @@ const DJsPicks = () => {
     const containerRef = useRef(null);
     const itemsRef = useRef([]); 
     const navigate = useNavigate();
-    // ADDED: Destructure volume and setVolume
     const { playingId, isPlaying, currentTime, duration, volume, setVolume, toggleTrack, seek } = useAudio();
     const [tracks, setTracks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -288,6 +289,13 @@ const DJsPicks = () => {
                     border: 1px solid transparent; 
                     transition: backdrop-filter 0.5s ease;
                 }
+
+                @media (max-width: 600px) {
+                    .brand-title { font-size: 1.5rem !important; }
+                    .track-title { font-size: 1rem !important; }
+                    .receipt-player { padding: 0 5px; }
+                    .track-cover { width: 50px !important; height: 50px !important; }
+                }
             `}</style>
         </div>
     );
@@ -340,8 +348,6 @@ const styles = {
     meta: { flexGrow: 1, paddingLeft: '15px', paddingRight: '10px', minWidth: 0 },
     title: { fontSize: '1.2rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '4px', lineHeight: '1.2' },
     artist: { fontSize: '0.8rem', opacity: 0.7 },
-    
-    // ADDED GENRE STYLE
     genre: {
         fontSize: '0.6rem',
         fontWeight: 'bold',
@@ -350,22 +356,30 @@ const styles = {
         color: '#E60000',
         letterSpacing: '1px'
     },
-    
     durationDisplay: { fontWeight: 'bold', fontSize: '0.9rem', flexShrink: 0 },
-    
     playerWrapper: { overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' },
     waveformLine: { display: 'flex', alignItems: 'center', gap: '3px', height: '30px', marginTop: '10px', width: '100%', overflow: 'hidden' },
     waveBar: { flex: 1, borderRadius: '2px', transition: 'height 0.1s ease', minWidth: '2px' },
+    
     controlsRow: { display: 'flex', alignItems: 'center', gap: '15px', width: '100%' },
     playBtn: { background: '#111', color: '#fff', border: 'none', padding: '8px 12px', fontFamily: 'inherit', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, borderRadius: '4px' },
     scrubberContainer: { flexGrow: 1, display: 'flex', alignItems: 'center' },
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
     
-    // --- ADDED VOLUME STYLES ---
-    volumeContainer: { display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '5px' },
+    // --- UPDATED VOLUME ROW STYLES ---
+    volumeRow: { 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', // Center it nicely
+        gap: '10px', 
+        width: '100%',
+        marginTop: '5px',
+        paddingTop: '10px',
+        borderTop: '1px dashed rgba(0,0,0,0.1)' // Adds a nice receipt separator line
+    },
     volLabel: { fontSize: '0.65rem', fontWeight: 'bold', opacity: 0.8 },
-    volumeInput: { width: '50px', accentColor: '#333', cursor: 'pointer', height: '3px' },
+    volumeInput: { width: '150px', accentColor: '#333', cursor: 'pointer', height: '3px' },
 
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '500px', marginTop: '20px', opacity: 0.6, display: 'flex', flexDirection: 'column', alignItems: 'center' },
     totalRow: { width: '100%', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '30px', padding: '0 5px' },

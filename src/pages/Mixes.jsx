@@ -27,6 +27,7 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, vo
 
     return (
         <div className="receipt-player" style={styles.playerWrapper}>
+            {/* 1. WAVEFORM ROW */}
             <div style={styles.waveformLine}>
                 {Array(25).fill(0).map((_, i) => (
                     <div key={i} style={{
@@ -37,6 +38,7 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, vo
                 ))}
             </div>
             
+            {/* 2. CONTROLS ROW (Play, Download, Scrubber, Time) */}
             <div className="controls-row" style={styles.controlsRow}>
                 <button onClick={(e) => { e.stopPropagation(); onToggle(); }} style={styles.playBtn}>
                     {isPlaying ? "PAUSE" : "PLAY"}
@@ -92,18 +94,18 @@ const ReceiptPlayer = ({ id, isPlaying, currentTime, duration, totalDuration, vo
                 <span style={styles.timeDisplay}>
                     {formatTime(currentTime)} / {formatTime(displayDuration)}
                 </span>
+            </div>
 
-                {/* --- ADDED VOLUME SLIDER --- */}
-                <div style={styles.volumeContainer} onClick={(e) => e.stopPropagation()}>
-                    <span style={styles.volLabel}>VOL</span>
-                    <input 
-                        type="range" 
-                        min="0" max="1" step="0.05"
-                        value={volume !== undefined ? volume : 1}
-                        onChange={(e) => onVolumeChange && onVolumeChange(parseFloat(e.target.value))}
-                        style={styles.volumeInput}
-                    />
-                </div>
+            {/* 3. VOLUME ROW (New separate row below controls) */}
+            <div style={styles.volumeRow} onClick={(e) => e.stopPropagation()}>
+                <span style={styles.volLabel}>VOLUME</span>
+                <input 
+                    type="range" 
+                    min="0" max="1" step="0.05"
+                    value={volume !== undefined ? volume : 1}
+                    onChange={(e) => onVolumeChange && onVolumeChange(parseFloat(e.target.value))}
+                    style={styles.volumeInput}
+                />
             </div>
         </div>
     );
@@ -695,10 +697,19 @@ const styles = {
     rangeInput: { width: '100%', accentColor: '#E60000', cursor: 'pointer', height: '4px' },
     timeDisplay: { fontSize: '0.75rem', fontWeight: 'bold', minWidth: '80px', textAlign: 'right' },
     
-    // --- ADDED VOLUME STYLES ---
-    volumeContainer: { display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '5px' },
+    // --- UPDATED VOLUME ROW STYLES ---
+    volumeRow: { 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', // Center it nicely
+        gap: '10px', 
+        width: '100%',
+        marginTop: '5px',
+        paddingTop: '10px',
+        borderTop: '1px dashed rgba(0,0,0,0.1)' // Adds a nice receipt separator line
+    },
     volLabel: { fontSize: '0.65rem', fontWeight: 'bold', opacity: 0.8 },
-    volumeInput: { width: '50px', accentColor: '#333', cursor: 'pointer', height: '3px' },
+    volumeInput: { width: '150px', accentColor: '#333', cursor: 'pointer', height: '3px' },
 
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '600px', marginTop: '20px', opacity: 0.6 },
     totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '20px', padding: '0 5px' },
