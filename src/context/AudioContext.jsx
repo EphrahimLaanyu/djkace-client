@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 
+
 // RENAME: Use 'PlayerContext' to avoid clashing with the browser's native 'AudioContext'
 const PlayerContext = createContext();
 
+
 export const useAudio = () => useContext(PlayerContext);
+
 
 export const AudioProvider = ({ children }) => {
     const audioRef = useRef(new Audio());
@@ -12,15 +15,17 @@ export const AudioProvider = ({ children }) => {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [currentTrackData, setCurrentTrackData] = useState(null);
-    
+   
     // --- ADDED: Volume State (Default 1.0 = 100%) ---
     const [volume, setVolumeState] = useState(1);
 
+
     useEffect(() => {
         const audio = audioRef.current;
-        
+       
         // Ensure volume is set on mount
         audio.volume = volume;
+
 
         const updateTime = () => setCurrentTime(audio.currentTime);
         const updateDuration = () => setDuration(audio.duration);
@@ -30,9 +35,11 @@ export const AudioProvider = ({ children }) => {
             setCurrentTime(0);
         };
 
+
         audio.addEventListener('timeupdate', updateTime);
         audio.addEventListener('loadedmetadata', updateDuration);
         audio.addEventListener('ended', onEnded);
+
 
         return () => {
             audio.removeEventListener('timeupdate', updateTime);
@@ -40,6 +47,7 @@ export const AudioProvider = ({ children }) => {
             audio.removeEventListener('ended', onEnded);
         };
     }, []); // Empty dependency array is fine here
+
 
     // --- ADDED: Volume Control Function ---
     const setVolume = (val) => {
@@ -50,8 +58,10 @@ export const AudioProvider = ({ children }) => {
         }
     };
 
+
     const toggleTrack = (track) => {
         const audio = audioRef.current;
+
 
         if (playingId === track.id) {
             if (isPlaying) {
@@ -64,24 +74,26 @@ export const AudioProvider = ({ children }) => {
             return;
         }
 
+
         // --- NEW TRACK LOGIC ---
         audio.pause();
         audio.src = track.audio;
         audio.load();
         audio.volume = volume; // Ensure volume persists on track change
-        
+       
         // --- ADDED: TRACK PLAY COUNT ---
-        fetch(`https://djkace-api.elaanyu.workers.dev/tracks/${track.id}/play`, { 
-            method: 'POST' 
+        fetch(`https://djkace-api.elaanyu.workers.dev/tracks/${track.id}/play`, {
+            method: 'POST'
         }).catch(err => console.error("Analytics Error:", err));
-        
+       
         audio.play()
             .then(() => setIsPlaying(true))
             .catch(e => console.error("Playback failed", e));
-            
+           
         setPlayingId(track.id);
         setCurrentTrackData(track);
     };
+
 
     const seek = (time) => {
         const audio = audioRef.current;
@@ -89,13 +101,14 @@ export const AudioProvider = ({ children }) => {
         setCurrentTime(time);
     };
 
+
     return (
-        <PlayerContext.Provider value={{ 
-            playingId, 
-            isPlaying, 
-            currentTime, 
-            duration, 
-            toggleTrack, 
+        <PlayerContext.Provider value={{
+            playingId,
+            isPlaying,
+            currentTime,
+            duration,
+            toggleTrack,
             seek,
             currentTrackData,
             // --- EXPORT NEW PROPS ---
@@ -107,4 +120,6 @@ export const AudioProvider = ({ children }) => {
     );
 };
 
+
 export default PlayerContext;
+
