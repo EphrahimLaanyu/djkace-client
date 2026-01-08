@@ -22,12 +22,13 @@ const Home = () => {
 };
 
 // ==========================================
-// 2. MOBILE COMPONENT (Static, Stylish Poster)
+// 2. MOBILE COMPONENT (Marquee Poster)
 // ==========================================
 const MobileDesign = () => {
-  // No GSAP, No Refs, just pure style.
+  const container = useRef();
+
   return (
-    <div style={mobileStyles.wrapper}>
+    <div ref={container} style={mobileStyles.wrapper}>
       {/* STATIC NOISE OVERLAY */}
       <div style={mobileStyles.noise}></div>
 
@@ -40,8 +41,12 @@ const MobileDesign = () => {
       {/* MAIN CONTENT - TYPOGRAPHY SANDWICH */}
       <div style={mobileStyles.container}>
         
-        {/* BIG TOP TEXT */}
-        <h1 style={mobileStyles.titleOutline}>DEEJAY</h1>
+        {/* TOP MARQUEE (OUTLINE) */}
+        <MobileMarquee 
+            text="DEEJAY" 
+            direction={-1} 
+            baseStyle={mobileStyles.titleOutline} 
+        />
 
         {/* THE SHIELD (CENTERPIECE) */}
         <div style={mobileStyles.imageContainer}>
@@ -49,8 +54,12 @@ const MobileDesign = () => {
             <img src={djImage} alt="Kace Shield" style={mobileStyles.shieldImage} />
         </div>
 
-        {/* BIG BOTTOM TEXT */}
-        <h1 style={mobileStyles.titleSolid}>KACE</h1>
+        {/* BOTTOM MARQUEE (SOLID) */}
+        <MobileMarquee 
+            text="KACE" 
+            direction={1} 
+            baseStyle={mobileStyles.titleSolid} 
+        />
 
         {/* TAGLINE */}
         <div style={mobileStyles.taglineBox}>
@@ -65,6 +74,46 @@ const MobileDesign = () => {
       </div>
     </div>
   );
+};
+
+// --- HELPER: MOBILE MARQUEE ---
+const MobileMarquee = ({ text, direction, baseStyle }) => {
+    const marqueeRef = useRef();
+    
+    useGSAP(() => {
+        // Create seamless loop
+        const content = marqueeRef.current;
+        const totalWidth = content.scrollWidth / 2; // Half because we duplicate text
+        
+        gsap.to(content, {
+            x: direction === 1 ? 0 : -totalWidth, // Move left or right
+            duration: 15, // Speed of scroll
+            ease: "none",
+            repeat: -1,
+            // If direction is 1 (right), start from -totalWidth to 0
+            // If direction is -1 (left), start from 0 to -totalWidth
+            modifiers: {
+                x: gsap.utils.unitize(x => {
+                    const val = parseFloat(x);
+                    return direction === 1 
+                        ? (val % totalWidth) - totalWidth 
+                        : val % totalWidth;
+                })
+            }
+        });
+    }, { scope: marqueeRef });
+
+    // Repeat text to ensure full coverage for loop
+    const repeatedText = Array(8).fill(text).join(" • ");
+
+    return (
+        <div style={{ width: '100vw', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
+            <div ref={marqueeRef} style={{ ...baseStyle, display: 'flex', whiteSpace: 'nowrap', width: 'fit-content' }}>
+                <span style={{ paddingRight: '20px' }}>{repeatedText}</span>
+                <span style={{ paddingRight: '20px' }}>{repeatedText}</span>
+            </div>
+        </div>
+    );
 };
 
 // ==========================================
@@ -148,7 +197,7 @@ const DesktopOriginal = () => {
 // 4. STYLES
 // ==========================================
 
-// --- NEW MOBILE STYLES (Static Poster) ---
+// --- MOBILE STYLES (Poster) ---
 const mobileStyles = {
     wrapper: {
         backgroundColor: '#F1E9DB',
@@ -161,7 +210,7 @@ const mobileStyles = {
         justifyContent: 'space-between', // Push top/bottom bars apart
         alignItems: 'center',
         fontFamily: '"Rajdhani", sans-serif',
-        padding: '20px',
+        padding: '20px 0', // Removed horizontal padding to let marquee hit edges
         boxSizing: 'border-box'
     },
     noise: { 
@@ -172,7 +221,7 @@ const mobileStyles = {
     
     // --- BARS ---
     topBar: {
-        width: '100%',
+        width: '90%', // Keep bars contained inside
         display: 'flex',
         justifyContent: 'space-between',
         fontSize: '0.8rem',
@@ -184,7 +233,7 @@ const mobileStyles = {
         zIndex: 2
     },
     bottomBar: {
-        width: '100%',
+        width: '90%',
         textAlign: 'center',
         fontSize: '0.7rem',
         fontWeight: 'bold',
@@ -213,20 +262,14 @@ const mobileStyles = {
         lineHeight: '0.8',
         color: 'transparent',
         WebkitTextStroke: '2px #111', // Outline effect
-        margin: 0,
         letterSpacing: '-2px',
-        position: 'relative',
-        zIndex: 2
     },
     titleSolid: {
         fontSize: '4.5rem',
         fontWeight: '900',
         lineHeight: '0.8',
         color: '#111',
-        margin: 0,
         letterSpacing: '-2px',
-        position: 'relative',
-        zIndex: 2
     },
 
     // The Shield Layout
