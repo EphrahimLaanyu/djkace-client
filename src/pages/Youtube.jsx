@@ -33,6 +33,7 @@ const YouTube = () => {
     
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedVideo, setSelectedVideo] = useState(null); 
 
     useLayoutEffect(() => {
         window.scrollTo(0, 0);
@@ -75,6 +76,8 @@ const YouTube = () => {
         if (el && !itemsRef.current.includes(el)) itemsRef.current.push(el);
     };
 
+    const closeModal = () => setSelectedVideo(null);
+
     if (loading) return <div style={styles.loader}>INITIALIZING VISUALS...</div>;
 
     return (
@@ -113,12 +116,17 @@ const YouTube = () => {
                                 key={video.id} 
                                 ref={addToRefs}
                                 style={styles.videoCard}
-                                onClick={() => window.open(video.link, '_blank')}
+                                onClick={() => setSelectedVideo(video)}
                                 className="video-card-hover"
                             >
-                                {/* CLEAN THUMBNAIL */}
                                 <div style={styles.imageContainer}>
                                     <div style={styles.cornerMarkerTop}></div>
+                                    
+                                    {/* PLAY BUTTON OVERLAY */}
+                                    <div className="play-overlay" style={styles.playOverlay}>
+                                        <div style={styles.playButton} className="play-button-icon">▶</div>
+                                    </div>
+
                                     <img 
                                         src={thumbnailUrl} 
                                         alt={video.title} 
@@ -128,7 +136,6 @@ const YouTube = () => {
                                     <div style={styles.cornerMarkerBottom}></div>
                                 </div>
 
-                                {/* STYLISH METADATA */}
                                 <div style={styles.metaContainer}>
                                     <div style={styles.metaHeader}>
                                         <span style={styles.idBadge}>REF: {index + 1 < 10 ? `0${index + 1}` : index + 1}</span>
@@ -136,7 +143,7 @@ const YouTube = () => {
                                     </div>
                                     <div style={styles.videoTitle} className="videoTitle">{video.title}</div>
                                     <div style={styles.actionLine}>
-                                        <span style={styles.watchLink}>Tap to Watch on YouTube ↗</span>
+                                        <span style={styles.watchLink}>Tap to Watch ↗</span>
                                     </div>
                                 </div>
                             </div>
@@ -146,9 +153,7 @@ const YouTube = () => {
 
                 <TechDivider />
                 
-                {/* FOOTER */}
                 <div style={styles.receiptFooter}>
-                 
                     <div style={styles.barcode}>|| ||| |||| || ||| || |||||</div>
                     <div style={styles.thankYou}>END OF VISUAL LOG</div>
                 </div>
@@ -157,34 +162,91 @@ const YouTube = () => {
 
             <Footer />
 
+            {/* MODAL IMPLEMENTATION */}
+            {selectedVideo && (
+                <div style={styles.modalOverlay} onClick={closeModal} className="modal-overlay">
+                    <div style={styles.modalContent} onClick={(e) => e.stopPropagation()} className="modal-content">
+                        <button style={styles.closeModalBtn} onClick={closeModal} className="close-modal-btn">✕ CLOSE</button>
+                        <div style={styles.iframeWrapper}>
+                            <iframe 
+                                src={`https://www.youtube.com/embed/${getYouTubeId(selectedVideo.link)}?autoplay=1`} 
+                                title="YouTube video player" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                allowFullScreen
+                                style={styles.iframe}
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <style>{`
-                /* GLOBAL BOX SIZING FIX */
+                /* GLOBAL FIXES */
                 * { box-sizing: border-box; }
 
-                /* Hover Effects */
+                /* DESKTOP HOVER EFFECTS */
                 .video-card-hover { transition: all 0.3s ease; }
                 .video-card-hover:hover { transform: translateY(-5px); }
                 .video-card-hover:hover .videoTitle { color: #E60000; }
                 .video-card-hover:hover img { filter: grayscale(0%) contrast(1.1); }
                 
-                /* Mobile Fixes */
+                .play-overlay { opacity: 0; transition: opacity 0.3s ease; }
+                .video-card-hover:hover .play-overlay { opacity: 1; }
+
+                /* --- MOBILE & RESPONSIVE STYLES --- */
                 @media (max-width: 768px) {
+                    /* Page Layout */
                     .pageWrapper {
-                        padding-top: 120px !important;
+                        padding-top: 100px !important;
                         padding-left: 15px !important;
                         padding-right: 15px !important;
-                        width: 100% !important; /* Forces fit */
-                    }
-                    .brandTitle { 
-                        font-size: 2rem !important; 
-                        letter-spacing: -1px !important;
-                    }
-                    .gridContainer { 
-                        grid-template-columns: 1fr !important; 
-                        gap: 35px !important; 
                         width: 100% !important;
                     }
+                    
+                    /* Typography */
+                    .brandTitle { 
+                        font-size: 1.8rem !important; 
+                        letter-spacing: -1px !important;
+                    }
+                    
+                    /* Grid - Single Column for Mobile */
+                    .gridContainer { 
+                        grid-template-columns: 1fr !important; 
+                        gap: 40px !important; /* increased gap for clarity on mobile scroll */
+                        width: 100% !important;
+                    }
+                    
                     .videoTitle { font-size: 1rem !important; }
+
+                    /* Always show Play Button on Mobile (since there is no hover) */
+                    .play-overlay {
+                        opacity: 1 !important;
+                        background-color: rgba(0,0,0,0.1) !important; /* Lighter overlay on mobile */
+                    }
+                    .play-button-icon {
+                        width: 50px !important;
+                        height: 50px !important;
+                        font-size: 20px !important;
+                        background-color: rgba(230, 0, 0, 0.9) !important;
+                    }
+
+                    /* --- MODAL MOBILE TWEAKS --- */
+                    .modal-overlay {
+                        padding: 10px !important; /* Tighter padding on mobile */
+                        align-items: center !important;
+                    }
+                    
+                    .modal-content {
+                        width: 100% !important;
+                    }
+
+                    .close-modal-btn {
+                        padding: 12px 20px !important; /* Larger touch target */
+                        font-size: 0.9rem !important;
+                        background: rgba(0,0,0,0.8) !important; /* Dark background to pop */
+                        margin-bottom: 10px !important;
+                    }
                 }
             `}</style>
         </div>
@@ -199,12 +261,12 @@ const styles = {
         backgroundColor: '#F1E9DB',
         display: 'flex', 
         flexDirection: 'column',
-        overflowX: 'hidden' // CRITICAL: Hides any accidental spillover
+        overflowX: 'hidden' 
     },
     pageWrapper: { 
         minHeight: '100vh', 
-        width: '100%', // CRITICAL FIX: Changed from 100vw to 100%
-        boxSizing: 'border-box', // CRITICAL FIX: Ensures padding doesn't add to width
+        width: '100%', 
+        boxSizing: 'border-box', 
         color: '#111', 
         fontFamily: '"Space Mono", monospace',
         display: 'flex', 
@@ -255,6 +317,21 @@ const styles = {
     },
     cornerMarkerTop: { position: 'absolute', top: '10px', left: '10px', width: '20px', height: '20px', borderTop: '2px solid #E60000', borderLeft: '2px solid #E60000', zIndex: 2 },
     cornerMarkerBottom: { position: 'absolute', bottom: '10px', right: '10px', width: '20px', height: '20px', borderBottom: '2px solid #E60000', borderRight: '2px solid #E60000', zIndex: 2 },
+    
+    // Play Overlay
+    playOverlay: {
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        zIndex: 3, pointerEvents: 'none'
+    },
+    playButton: {
+        width: '60px', height: '60px', borderRadius: '50%',
+        backgroundColor: '#E60000', color: '#fff',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        fontSize: '24px', paddingLeft: '4px',
+        boxShadow: '0 0 20px rgba(230, 0, 0, 0.5)'
+    },
 
     // METADATA
     metaContainer: { display: 'flex', flexDirection: 'column', gap: '8px' },
@@ -272,9 +349,35 @@ const styles = {
 
     // FOOTER
     receiptFooter: { textAlign: 'center', width: '100%', maxWidth: '600px', marginTop: '20px', opacity: 0.6 },
-    totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1rem', marginBottom: '20px', padding: '0 20px' },
     barcode: { fontFamily: '"Libre Barcode 39 Text", cursive', fontSize: '2rem', letterSpacing: '4px', transform: 'scaleY(1.5)', marginBottom: '10px' },
     thankYou: { fontSize: '0.8rem' },
+
+    // MODAL STYLES
+    modalOverlay: {
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+        backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 9999,
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        padding: '20px'
+    },
+    modalContent: {
+        width: '100%', maxWidth: '900px',
+        display: 'flex', flexDirection: 'column', gap: '10px'
+    },
+    closeModalBtn: {
+        alignSelf: 'flex-end',
+        background: 'transparent', color: '#fff',
+        border: '1px solid #E60000', padding: '8px 16px',
+        cursor: 'pointer', fontFamily: 'inherit', fontWeight: 'bold',
+        fontSize: '0.8rem', letterSpacing: '1px',
+        transition: 'all 0.2s'
+    },
+    iframeWrapper: {
+        position: 'relative', width: '100%', paddingBottom: '56.25%', // 16:9
+        backgroundColor: '#000', border: '1px solid #333'
+    },
+    iframe: {
+        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'
+    }
 };
 
 export default YouTube;
